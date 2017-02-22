@@ -1,0 +1,234 @@
+@font-face {
+  font-family: "Gotham";
+  src: url("fonts/gotham-book.otf") format('opentype');
+  font-weight: 400;
+}
+
+@font-face {
+    font-family: "Gotham";
+    src: url("fonts/gotham-bold.otf") format('opentype');
+    font-weight: 600;
+}
+
+@font-face {
+    font-family: "Gotham";
+    src: url("fonts/gotham-light.otf") format('opentype');
+    font-weight: 300;
+}
+
+@font-face {
+  font-family: "Open";
+  src: url("fonts/open.woff") format('woff');
+  font-weight: 400;
+}
+
+@font-face {
+    font-family: "Open";
+    src: url("fonts/open-semi-bold.woff") format('woff');
+    font-weight: 600;
+}
+
+@font-face {
+    font-family: "Open";
+    src: url("fonts/open-light.woff") format('woff');
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: "Open";
+    src: url("fonts/open-bold.woff") format('woff');
+    font-weight: 700;
+}
+
+* { padding: 0; margin: 0; outline:0; border:0; border-radius:0; background:none; -webkit-font-smoothing: antialiased; line-height: inherit; text-decoration:none; font:inherit; letter-spacing: inherit; -webkit-appearance: none; -moz-appearance: none; box-sizing: border-box; }
+
+body {
+  /*background-color: #fff;
+  color: white;*/
+  font: 14px/1.4 "Open", "Helvetica Neue", sans-serif;
+}
+
+#header, #master, #center {
+  max-width: 950px;
+  width: 90%;
+}
+
+#header {
+  margin: 17px auto 15px;
+  text-align: right;
+  border-bottom: 1px solid black;
+  padding-bottom: 5px;
+  font-size: 15px;
+}
+
+#header a {
+  text-decoration: none;
+  margin-left: 20px;
+}
+
+#master {
+  margin: 0 auto;
+}
+
+form {
+  width: 100%;
+  text-align: right;
+  display: inline-block;
+}
+
+.f1 { width: 370px; }
+.f2 { width: 580px; }
+
+.labels {
+  position: absolute;
+  margin-left: -180px;
+  width: 150px;
+  text-align: right;
+}
+
+.labels > div {
+  padding: 16px 0;
+  margin-bottom: 6px;
+}
+
+input, input[type='radio'] + label, textarea {
+  letter-spacing: .2px;
+  color: inherit;
+  border: 1px solid #000;
+  margin-bottom: 6px;
+  padding: 15px;
+  display: inline-block;
+  vertical-align: top;
+  width: 100%;
+  text-align: center;
+  /*border-radius: 2px;*/
+}
+
+input[type='radio'] {
+  display: none;
+}
+
+input[type='radio'] + label {
+  transition: background-color .2s, color .2s;
+  cursor: pointer;
+}
+
+input[type='radio']:checked + label {
+  background-color: #333;
+  color: white;
+}
+
+input[type='submit'] {
+  background-color: white;
+  color: black;
+  width: auto;
+  padding-left: 25px;
+  padding-right: 25px;
+  cursor: pointer;
+}
+
+textarea {
+  resize: none;
+  text-align: left;
+}
+
+.row {
+  display: inline-flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.row input, .row label {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+.row input:first-of-type, .row label:first-of-type { margin-left: 0; }
+.row input:last-of-type, .row label:last-of-type { margin-right: 0; }
+
+h1 {
+  margin-bottom: 4px;
+  font-size: 36px;
+  letter-spacing: -1.6px;
+  font-weight: 300;
+  font-family: "Gotham";
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 25px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+a {
+  cursor: pointer;
+  color: inherit;
+  text-decoration: underline;
+}
+
+b {
+  font-weight: 700;
+}
+
+.error {
+  color: #fa4 !important;
+}
+
+.message {
+  display: inline;
+  color: rgba(0,0,0,0);
+  transition: color .5s;
+  position: absolute;
+  z-index: 1;
+  margin: 10px 8px;
+}
+
+::-webkit-input-placeholder {
+  color: rgba(0,0,0,.6);
+}
+
+/*PAGES*/
+#center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: absolute;
+  top: 50px;
+  bottom: 30px;
+}
+
+/*ALERTS*/
+.alert-container {
+  display: block;
+  text-align: right;
+  transition: height .4s;
+  height: 0;
+}
+
+.alert {
+  background-color: #333;
+  color: white;
+  padding: 25px 35px;
+  cursor: pointer;
+  pointer-events: all;
+  transition: background-color .4s, color .3s;
+  -webkit-user-select: none;
+  border-radius: 2px;
+}
+
+#alerts {
+  pointer-events: none;
+  background: none;
+  position: fixed;
+  z-index: 20;
+  bottom: 0px;
+  right: 20px;
+}
+
+.profile_picture {
+  border: 1px solid black;
+  height: 250px;
+  width: 250px;
+  margin-bottom: 10px;
+}
