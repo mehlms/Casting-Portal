@@ -54,7 +54,7 @@ body {
 }
 
 #header {
-  margin: 17px auto 15px;
+  margin: 17px auto 20px;
   text-align: right;
   border-bottom: 1px solid black;
   padding-bottom: 5px;
@@ -78,8 +78,10 @@ form {
 
 .f1 { width: 370px; }
 .f2 { width: 580px; }
+.f3 { width: 250px; }
 
 .labels {
+  display: inline-block;
   position: absolute;
   margin-left: -180px;
   width: 150px;

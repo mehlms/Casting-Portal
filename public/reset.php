@@ -9,7 +9,7 @@ $db->query("DROP TABLE IF EXISTS accounts");
 $db->query("CREATE TABLE accounts (id INT PRIMARY KEY AUTO_INCREMENT, token VARCHAR(40), username VARCHAR(40), email VARCHAR(40), firstname VARCHAR(40), lastname VARCHAR(40), role INT, gender INT, dob DATETIME, created DATETIME, last_access DATETIME)");
 
 // table pictures (id, accountid, url, type) type determines profile picture or additional picture
-// table actors 
+// table actors
 
 ?>
 
