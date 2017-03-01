@@ -1,48 +1,61 @@
 <?php include "../inc/header.php"; ?>
 
-<div style="text-align: center">
-  <h1>Create a Casting Call</h1>
-  Actors will be recommended from your character descriptions. <br><br>
-  <div class='labels'>
-    <div>Audition Time</div>
-    <div>Shooting Dates</div>
-    <div>something</div>
-    <div>Name</div>
-    <div>Gender</div>
-    <div>Age Range</div>
-    <div>Description</div>
+<form onsubmit='create(this); return false' class='f1'>
+  <input type='hidden' name='func' value='create'>
+  <div class="row">
+    <div>
+      <label>Project Details</label>
+      <select name="type">
+        <option value="0">Project Type</option>
+        <option value="23">Undergraduate Visual Storytelling (FTV 130)</option>
+        <option value="1">Undergraduate Directing 2 (FP 338)</option>
+        <option value="2">Undergraduate Directing 3 (FP 438)</option>
+        <option value="3">Undergraduate Intermediate Production (FP 280)</option>
+        <option value="4">Undergraduate Advanced Production (FP 331)</option>
+        <option value="5">Undergraduate Senior Thesis (FP 497-498)</option>
+        <option value="6">Undergraduate Byte-sized Television (TWP 313)</option>
+        <option value="7">Undergraduate Television Pilots (TWP 398)</option>
+        <option value="8">Undergraduate Digital Arts Project</option>
+        <option value="9">Undergraduate Independent Study</option>
+        <option value="10">Graduate Fundamentals of Directing 1 (FP 538)</option>
+        <option value="11">Graduate Fundamentals of Directing 2 (FP 539)</option>
+        <option value="12">Graduate Intermediate Directing (FP 664)</option>
+        <option value="13">Graduate Advanced Directing (FP 665)</option>
+        <option value="14">Graduate Master Class in Directing (FP 638)</option>
+        <option value="15">Graduate Production Workshop 1 (FP 531)</option>
+        <option value="16">Graduate Production Workshop 2 (FP 532)</option>
+        <option value="17">Graduate Production Workshop 3 (FP 577)</option>
+        <option value="18">Graduate Production Workshop 4 (FP 631)</option>
+        <option value="19">Graduate Thesis (FP 698)</option>
+        <option value="20">Graduate Filmmakers and Actors Workshop (FP 507)</option>
+        <option value="21">Graduate Independent Study</option>
+        <option value="22">Other</option>
+      </select>
+      <input type='text' placeholder='Project Title' name='firstname' spellcheck='false' autocomplete='off' maxlength='40'>
+      <textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Project Description.."></textarea>
+      <div class="row">
+        <input type='text' placeholder='Location' name='min' spellcheck='false' autocomplete='off' maxlength='40'>
+        <input type='text' placeholder='Time' name='min' spellcheck='false' autocomplete='off' maxlength='40'>
+      </div>
+    </div>
   </div>
-  <form onsubmit='create(this); return false' class='f3'>
-    <input type='hidden' name='func' value='create'>
+
+  <div>
+    <label>Character 1</label>
     <div class="row">
-      <input type='text' placeholder='Time' name='firstname' spellcheck='false' autocomplete='off' maxlength='40'>
+      <input type='text' placeholder='Name' name='firstname' spellcheck='false' autocomplete='off' maxlength='40'>
+      <select name="gender">
+        <option value="0">Gender</option>
+        <option value="1">Male</option>
+        <option value="2">Female</option>
+      </select>
+      <input type='text' placeholder='Min Age' name='firstname' spellcheck='false' autocomplete='off' maxlength='40'>
+      <input type='text' placeholder='Max Age' name='firstname' spellcheck='false' autocomplete='off' maxlength='40'>
     </div>
-    <div class="row">
-      <input type='text' placeholder='Time' name='firstname' spellcheck='false' autocomplete='off' maxlength='40'>
-    </div>
-    <div class="row">
-      <input type='text' placeholder='Min' name='min' spellcheck='false' autocomplete='off' maxlength='40'>
-      <input type='text' placeholder='Max' name='max' spellcheck='false' autocomplete='off' maxlength='40'>
-    </div>
-    <div class="row">
-      <input type='text' placeholder='Firstname' name='firstname' spellcheck='false' autocomplete='off' maxlength='40'>
-      <input type='text' placeholder='Lastname' name='lastname' spellcheck='false' autocomplete='off' maxlength='40'>
-    </div>
-    <div class="row">
-      <input type="radio" name="gender" value="0" checked>
-      <input type="radio" name="gender" value="1" id='r3'><label for='r3'>Male</label>
-      <input type="radio" name="gender" value="2" id='r4'><label for='r4'>Female</label>
-    </div>
-    <div class="row">
-      <input type='text' placeholder='Min' name='min' spellcheck='false' autocomplete='off' maxlength='40'>
-      <input type='text' placeholder='Max' name='max' spellcheck='false' autocomplete='off' maxlength='40'>
-    </div>
-    <div class="row">
-      <textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Write a brief character bio.."></textarea>
-    </div>
-    <input type='submit' value='&rarr;'>
-  </form>
-</div>
+    <textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Character Description.."></textarea>
+  </div>
+  <input type='submit' value='&rarr;'>
+</form>
 
 <script>
   function create(form) {

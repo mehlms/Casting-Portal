@@ -73,27 +73,32 @@ body {
 form {
   width: 100%;
   text-align: right;
-  display: inline-block;
 }
 
-.f1 { width: 370px; }
+/*.f1 { width: 370px; }
 .f2 { width: 580px; }
-.f3 { width: 250px; }
+.f3 { width: 250px; }*/
 
-.labels {
-  display: inline-block;
+/*.labels {
   position: absolute;
   margin-left: -180px;
   width: 150px;
-  text-align: right;
 }
 
 .labels > div {
   padding: 16px 0;
   margin-bottom: 6px;
+}*/
+
+label {
+  text-align: left;
+  width: 100%;
+  display: inline-block;
+  margin-bottom: 7px;
+  font-weight: 600;
 }
 
-input, input[type='radio'] + label, textarea {
+input, input[type='radio'] + label, textarea, select {
   letter-spacing: .2px;
   color: inherit;
   border: 1px solid #000;
@@ -102,8 +107,7 @@ input, input[type='radio'] + label, textarea {
   display: inline-block;
   vertical-align: top;
   width: 100%;
-  text-align: center;
-  /*border-radius: 2px;*/
+  /*text-align: center;*/
 }
 
 input[type='radio'] {
@@ -120,7 +124,15 @@ input[type='radio']:checked + label {
   color: white;
 }
 
-input[type='submit'] {
+select {
+    background: url('images/arrow_down_thin.png') no-repeat 95% 11px;
+    background-size: 29px 29px;
+    padding-right: 40px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+input[type='submit'], input[type='button'] {
   background-color: white;
   color: black;
   width: auto;
@@ -136,16 +148,25 @@ textarea {
 
 .row {
   display: inline-flex;
-  justify-content: space-around;
+  justify-content: space-between;
   width: 100%;
 }
 
-.row input, .row label {
+.row > input, .row > label, .row > select {
   margin-left: 2px;
   margin-right: 2px;
+  flex-basis: 0;
+  flex-grow: 1;
 }
-.row input:first-of-type, .row label:first-of-type { margin-left: 0; }
-.row input:last-of-type, .row label:last-of-type { margin-right: 0; }
+
+.row > div {
+  margin-left: 15px;
+  margin-right: 15px;
+  flex-basis: 0;
+  flex-grow: 1;
+}
+.row > input:first-of-type, .row > label:first-of-type, .row > div:first-of-type { margin-left: 0; }
+.row > input:last-of-type, .row > label:last-of-type, .row > div:last-of-type { margin-right: 0; }
 
 h1 {
   margin-bottom: 4px;
