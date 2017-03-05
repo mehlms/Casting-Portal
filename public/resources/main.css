@@ -75,9 +75,9 @@ form {
   text-align: right;
 }
 
-/*.f1 { width: 370px; }
+.f1 { width: 400px; }
 .f2 { width: 580px; }
-.f3 { width: 250px; }*/
+.f3 { width: 250px; }
 
 /*.labels {
   position: absolute;
@@ -107,7 +107,6 @@ input, input[type='radio'] + label, textarea, select {
   display: inline-block;
   vertical-align: top;
   width: 100%;
-  /*text-align: center;*/
 }
 
 input[type='radio'] {
@@ -155,8 +154,8 @@ textarea {
 .row > input, .row > label, .row > select {
   margin-left: 2px;
   margin-right: 2px;
-  flex-basis: 0;
-  flex-grow: 1;
+  flex: 1;
+  width: 0;
 }
 
 .row > div {
@@ -165,8 +164,8 @@ textarea {
   flex-basis: 0;
   flex-grow: 1;
 }
-.row > input:first-of-type, .row > label:first-of-type, .row > div:first-of-type { margin-left: 0; }
-.row > input:last-of-type, .row > label:last-of-type, .row > div:last-of-type { margin-right: 0; }
+.row > input:first-child, .row > label:first-child, .row > div:first-child, .row > select:first-child { margin-left: 0; }
+.row > input:last-child, .row > label:last-child, .row > div:last-child, .row > select:last-child { margin-right: 0; }
 
 h1 {
   margin-bottom: 4px;

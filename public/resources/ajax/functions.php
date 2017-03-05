@@ -44,6 +44,40 @@ else if ($MYACCOUNT && $func == "complete") {
   } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
 }
 
+else if ($MYACCOUNT && $func == "create") {
+  $title = getWords("title");
+  $type = getInt("type");
+  $location = get("audition_location");
+  $audition_time = get("audition_time");
+  $description = get("description");
+  $gender_c1 = getInt("gender_c1");
+  $name_c1 = get("name_c1");
+  $min_age_c1 = getInt("min_age_c1");
+  $max_age_c1 = getInt("max_age_c1");
+  $description_c1 = get("description_c1");
+
+  if ($title && $type && $location && $audition_time && $description && $name_c1 && $gender_c1 && $min_age_c1 && $max_age_c1 && $description_c1) {
+    // try {
+    //   $director_id = intval($MYACCOUNT['id']);
+    //   // echo json_encode(array("status"=>"ok", "message"=>"[".$time."]"));
+    //   // return;
+    //   $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $director_id, '$title', $type, '$description', '$location', '$audition_time', NOW())");
+    //   $call_id = $db->query("SELECT id FROM calls ORDER BY id DESC")->fetch()['id'];
+    //   $db->query("INSERT INTO characters VALUES (null, $call_id, '$name_c1', '$description_c1', $min_age_c1, $max_age_c1, $gender_c1)");
+    //   echo json_encode(array("status"=>"ok", "message"=>"OMZ Woah Woah"));
+    // } catch (Exception $e) {
+    //   echo json_encode(array("status"=>"ok", "message"=>$e->getMessage()));
+    // }
+    // return;
+
+    $director_id = intval($MYACCOUNT['id']);
+    $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $director_id, '$title', $type, '$description', '$location', '$audition_time', NOW())");
+    $call_id = $db->query("SELECT id FROM calls ORDER BY id DESC")->fetch()['id'];
+    $db->query("INSERT INTO characters VALUES (null, $call_id, '$name_c1', '$description_c1', $min_age_c1, $max_age_c1, $gender_c1)");
+    echo json_encode(array("status"=>"ok", "message"=>"It Worked! Check the database Mr. Partida ;)"));
+  } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
+}
+
 else echo json_encode(array("status"=>"failed", "message"=>"That function does not exist"));
 
 

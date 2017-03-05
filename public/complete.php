@@ -5,31 +5,27 @@
     <h1>Almost There</h1>
     Please complete your profile to continue. <br><br>
     <form onsubmit='complete(this); return false' class='f1'>
-      <div class='labels'>
-        <div>Role</div>
-        <div>Gender</div>
-        <div>Date of Birth</div>
-        <div>Fullname</div>
-      </div>
       <input type='hidden' name='func' value='complete'>
-      <div class="row">
-        <input type="radio" name="role" value="0" checked>
-        <input type="radio" name="role" value="1" id='r1'><label for='r1'>Casting Director</label>
-        <input type="radio" name="role" value="2" id='r2'><label for='r2'>Talent</label>
-      </div>
-      <div class="row">
-        <input type="radio" name="gender" value="0" checked>
-        <input type="radio" name="gender" value="1" id='r3'><label for='r3'>Male</label>
-        <input type="radio" name="gender" value="2" id='r4'><label for='r4'>Female</label>
-      </div>
-      <div class="row">
-        <input type='text' placeholder='Month' name='month' spellcheck='false' autocomplete='off' maxlength='40'>
-        <input type='text' placeholder='Day' name='day' spellcheck='false' autocomplete='off' maxlength='40'>
-        <input type='text' placeholder='Year' name='year' spellcheck='false' autocomplete='off' maxlength='40'>
-      </div>
       <div class="row">
         <input type='text' placeholder='Firstname' name='firstname' spellcheck='false' autocomplete='off' maxlength='40'>
         <input type='text' placeholder='Lastname' name='lastname' spellcheck='false' autocomplete='off' maxlength='40'>
+      </div>
+      <div class="row">
+        <select name="role" style='flex-grow:.5'>
+          <option value="0">Role</option>
+          <option value="1">Casting Director</option>
+          <option value="2">Talent</option>
+        </select>
+        <select name="gender" style='flex-grow:.5'>
+          <option value="0">Gender</option>
+          <option value="1">Male</option>
+          <option value="2">Female</option>
+        </select>
+      </div>
+      <div class="row">
+        <input type='text' placeholder='Birth Month' name='month' spellcheck='false' autocomplete='off' maxlength='40'>
+        <input type='text' placeholder='Birth Day' name='day' spellcheck='false' autocomplete='off' maxlength='40'>
+        <input type='text' placeholder='Birth Year' name='year' spellcheck='false' autocomplete='off' maxlength='40'>
       </div>
       <input type='submit' value='&rarr;'>
     </form>
