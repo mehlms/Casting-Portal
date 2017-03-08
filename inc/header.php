@@ -84,29 +84,27 @@ else if ($MYACCOUNT && $MYACCOUNT['firstname'] == NULL && $_SERVER['REQUEST_URI'
         </select>
         <input type='text' class='query' placeholder='Search' spellcheck='false' autocomplete='off' maxlength='40' name='email'>
       </div>
-    <!-- <div class='equal' style=''></div> -->
-    <?php
-    if ($MYACCOUNT && $MYACCOUNT['firstname'] != null) {
-      if ($MYACCOUNT['mode']) {
-        echo "
-          <select onchange='toggleMode(this.value)' style='background-color:#fff'>
-              <option value='0'>Actor</option>
-              <option value='1' selected>Director</option>
-          </select>
-          <a href='/director/".$MYACCOUNT['d_id']."' id='account'></a>
-        </div>
-        ";
-      } else {
-        echo "
-          <select onchange='toggleMode(this.value)' style='background-color:#fff'>
-              <option value='0' selected>Actor</option>
-              <option value='1'>Director</option>
-          </select>
-          <a href='/actor/".$MYACCOUNT['a_id']."' id='account'></a>
-        </div>
-        ";
-      }
-    }
-    ?>
+      <?php
+        if ($MYACCOUNT && $MYACCOUNT['firstname'] != null) {
+          if ($MYACCOUNT['mode']) {
+            echo "
+              <select onchange='toggleMode(this.value)' style='background-color:#fff'>
+                  <option value='0'>Actor</option>
+                  <option value='1' selected>Director</option>
+              </select>
+              <a href='/director/".$MYACCOUNT['d_id']."' id='account'></a>
+            ";
+          } else {
+            echo "
+              <select onchange='toggleMode(this.value)' style='background-color:#fff'>
+                  <option value='0' selected>Actor</option>
+                  <option value='1'>Director</option>
+              </select>
+              <a href='/actor/".$MYACCOUNT['a_id']."' id='account'></a>
+            ";
+          }
+        }
+      ?>
+    </div>
   </div>
   <div id="master">
