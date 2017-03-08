@@ -1,7 +1,7 @@
 <?php include "../inc/header.php" ?>
 
 <div id="center">
-  <div style='width: 100%'>
+  <div>
     <h1>Error</h1>
     That page does not exist.
   </div>

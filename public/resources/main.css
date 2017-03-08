@@ -124,11 +124,11 @@ input[type='radio']:checked + label {
 }
 
 select {
-    background: url('images/arrow_down_thin.png') no-repeat 95% 11px;
-    background-size: 29px 29px;
-    padding-right: 40px;
-    text-overflow: ellipsis;
-    overflow: hidden;
+  background: url('images/arrow_down_thin.png') no-repeat 95% 11px;
+  background-size: 29px 29px;
+  padding-right: 40px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 input[type='submit'], input[type='button'] {

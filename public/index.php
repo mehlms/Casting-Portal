@@ -1,5 +1,5 @@
-<?php include "../inc/header.php" ?>
+<?php include "../inc/header.php"; ?>
 
-Homepage
+Hello There
 
 <?php include "../inc/footer.php" ?>
