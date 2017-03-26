@@ -1,5 +1,7 @@
 <?php include "../../../inc/db.php";
 
+ini_set('client_max_body_size', '4m');
+
 $token = $MYACCOUNT['token'];
 $func = get("func");
 
@@ -19,11 +21,7 @@ if ($func == "login") {
         $db->query("INSERT INTO accounts VALUES (null, (SELECT UUID_short()), (SELECT UUID_short()), 0, '$token', '$email', null, null, null, null, 0, 0, 0, NOW(), NOW())");
         setCookie("token", $token, time()+3600*24*365, "/");
       }
-      $url = "";
-      if ($MYACCOUNT && $MYACCOUNT['mode']) $url .= "/director/".$MYACCOUNT['d_id'];
-      else if ($MYACCOUNT && !$MYACCOUNT['mode']) $url .= "/actor/".$MYACCOUNT['a_id'];
-      else $url .= "/complete/";
-      echo json_encode(array("status"=>"ok", "url"=>$url));
+      echo json_encode(array("status"=>"ok"));
     } else echo json_encode(array("status"=>"failed", "message"=>"Invalid credentials"));
   } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
 }
@@ -59,20 +57,63 @@ else if ($MYACCOUNT && $func == "create") {
   $description_c1 = get("description_c1");
 
   if ($title && $type && $location && $audition_time && $description && $name_c1 && $gender_c1 && $min_age_c1 && $max_age_c1 && $description_c1) {
-    $director_id = intval($MYACCOUNT['id']);
-    $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $director_id, '$title', $type, '$description', '$location', '$audition_time', NOW())");
-    $call_id = $db->query("SELECT id FROM calls ORDER BY id DESC")->fetch()['id'];
-    $db->query("INSERT INTO characters VALUES (null, $call_id, '$name_c1', '$description_c1', $min_age_c1, $max_age_c1, $gender_c1)");
-    echo json_encode(array("status"=>"ok", "message"=>"It Worked! Check the database Mr. Partida ;)"));
+    try {
+      $d_id = intval($MYACCOUNT['d_id']);
+      $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $d_id, '$title', $type, '$description', '$location', '$audition_time', NOW())");
+      $call_id = $db->query("SELECT id FROM calls ORDER BY id DESC")->fetch()['id'];
+      $db->query("INSERT INTO characters VALUES (null, $call_id, '$name_c1', '$description_c1', $min_age_c1, $max_age_c1, $gender_c1)");
+      echo json_encode(array("status"=>"ok", "url"=>"/call/".$call_id."/"));
+    } catch (Exception $e) {
+      echo json_encode(array("status"=>"ok", "message"=>$e));
+    }
   } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
 }
 
-else if ($MYACCOUNT && $func == "toggleMode") {
-  $mode = getInt("mode");
-  $db->query("UPDATE accounts SET mode=$mode WHERE token='$token'");
+else if ($MYACCOUNT && $func == 'interested') {
+  try {
+    $a_id = $MYACCOUNT['a_id'];
+    $d_id = getInt("d_id");
+    $char_id = getInt("char_id");
+    $existanceCheck = $db->query("SELECT COUNT(id) FROM notifications WHERE type=1 AND a_id=$a_id AND d_id=$d_id AND char_id=$char_id")->fetch()[0];
+    if ($existanceCheck) {
+      $db->query("DELETE FROM notifications WHERE type=1 AND a_id=$a_id AND d_id=$d_id AND char_id=$char_id");
+      echo json_encode(array("status"=>"ok", "message"=>"You have revoked your interest", "interested"=>0));
+    } else {
+      $db->query("INSERT INTO notifications VALUES (null, 1, $a_id, $d_id, $char_id, NOW())");
+      echo json_encode(array("status"=>"ok", "message"=>"The director has been notified", "interested"=>1));
+    }
+  } catch (Exception $e) {
+    echo json_encode(array("status"=>"failed", "message"=>$e));
+  }
+}
+
+else if ($MYACCOUNT && $func == 'uploadImage') {
+  $src = null;
+  if ($_FILES["image"]["type"] == "image/png") $src = imagecreatefrompng($_FILES["image"]["tmp_name"]);
+  else if ($_FILES["image"]["type"] == "image/jpeg") $src = imagecreatefromjpeg($_FILES["image"]["tmp_name"]);
+  else {
+    echo json_encode(array("status"=>"failed", "message"=>".JPG and .PNG only please"));
+    return;
+  }
+  list($width, $height) = getimagesize($_FILES['image']['tmp_name']);
+  $xPos = 0;
+  $yPos = 0;
+  if ($width > $height) {
+    $xPos = ($width - $height) / 2;
+    $width = $height;
+  } else if ($height > $width) {
+    $yPos = ($height - $width) / 2;
+    $height = $width;
+  }
+  $filename = time().rand().".jpg";
+  $dst = imagecreatetruecolor(250, 250);
+  imagecopyresampled($dst, $src, 0, 0, $xPos, $yPos, 250, 250, $width, $height);
+  imagejpeg($dst, "../assets/profile/".$filename, 100);
+  $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
+  $db->query("INSERT INTO assets VALUES (null, $page_id, '$filename', 1, 1)");
+  echo json_encode(array("status"=>"ok", "message"=>"Updated", "filename"=>$filename));
 }
 else echo json_encode(array("status"=>"failed", "message"=>"That function does not exist"));
-
 
 function get($s) { return isset($_POST[$s]) ? trim($_POST[$s]) : null; }
 function getWords($s) { return isset($_POST[$s]) ? ucwords(trim($_POST[$s])) : null; }

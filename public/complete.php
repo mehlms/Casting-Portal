@@ -4,7 +4,8 @@
   <div>
     <h1>Complete Your Profile</h1>
     Please include some basic information to continue. <br>
-    <form onsubmit='complete(this); return false' class='f2'>
+    <div class='spacer'></div>
+    <form onsubmit='complete(this); return false' class='f2 right'>
       <input type='hidden' name='func' value='complete'>
       <div class="row">
         <input type='text' placeholder='Firstname' name='firstname' spellcheck='false' autocomplete='off' maxlength='40'>
