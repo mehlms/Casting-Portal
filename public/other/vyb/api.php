@@ -14,18 +14,19 @@ if (get("token")) {
 }
 
 if ($func == "register") {
-  $spotify_id = get("spotify_id");
-  $soundcloud_id = get("soundcloud_id");
+  $spotify_id = getInt("spotify_id");
+  $soundcloud_id = getInt("soundcloud_id");
   $display_name = get("display_name");
 
   if ($display_name && ($spotify_id || $soundcloud_id)) {
-    $existenceCheck = $db->query("SELECT * FROM accounts WHERE spotify_id='$spotify_id' OR soundcloud_id='$soundcloud_id'")->fetch();
+    $existenceCheck = $db->query("SELECT * FROM accounts WHERE (spotify_id != 0 && spotify_id=$spotify_id) || (soundcloud_id != 0 && soundcloud_id=$soundcloud_id)")->fetch();
     if ($existenceCheck) {
-      echo json_encode(array("status"=>"ok", "vyb_token"=>$existenceCheck["token"]));
+      echo json_encode(array("status"=>"ok", "vyb_token"=>$existenceCheck["token"], "streamer_id"=>$existenceCheck['id']));
     } else {
       $token = sha1(time().rand());
-      $db->query("INSERT INTO accounts VALUES (null, '$spotify_id', '$soundcloud_id', '$display_name', 0, 0, '$token', NOW())");
-      echo json_encode(array("status"=>"ok", "vyb_token"=>$token));
+      $db->query("INSERT INTO accounts VALUES (null, $spotify_id, $soundcloud_id, '$display_name', '$token', NOW())");
+      $newAccount = $db->query("SELECT * FROM accounts WHERE token='$token'")->fetch();
+      echo json_encode(array("status"=>"ok", "vyb_token"=>$token, "streamer_id"=>$newAccount['id']));
     }
   } else {
     echo json_encode(array("status"=>"failed"));
@@ -33,47 +34,42 @@ if ($func == "register") {
 }
 
 else if ($MYACCOUNT && $func == "updateAccount") {
-  $token = $MYACCOUNT['token'];
-  $spotify_id = get("spotify_id");
-  $soundcloud_id = get("soundcloud_id");
-  $display_name = get("display_name");
-  $lat = getDouble("lat");
-  $lng = getDouble("lng");
+  // $id = $MYACCOUNT['id'];
+  // $spotify_id = get("spotify_id");
+  // $soundcloud_id = get("soundcloud_id");
+  // $display_name = get("display_name");
+  // $lat = getDouble("lat");
+  // $lng = getDouble("lng");
 
-  if ($display_name && $spotify_id && $soundcloud_id) {
-    $db->query("UPDATE accounts SET spotify_id='$spotify_id', soundcloud_id='$soundcloud_id', display_name='$display_name' WHERE token='$token'");
-    echo json_encode(array("status"=>"ok"));
-  } else if ($lat && $lng) {
-    $db->query("UPDATE accounts SET lat=$lat, lng=$lng WHERE token='$token'");
-    echo json_encode(array("status"=>"ok"));
-  } else {
-    echo json_encode(array("status"=>"failed"));
-  }
+  // if ($display_name && $spotify_id && $soundcloud_id) {
+  //   $db->query("UPDATE accounts SET spotify_id='$spotify_id', soundcloud_id='$soundcloud_id', display_name='$display_name' WHERE id=$id");
+  //   echo json_encode(array("status"=>"ok"));
+  // } else if ($lat && $lng) {
+  //   $db->query("UPDATE accounts SET lat=$lat, lng=$lng WHERE token='$token'");
+  //   echo json_encode(array("status"=>"ok"));
+  // } else {
+  //   echo json_encode(array("status"=>"failed"));
+  // }
 }
 
 else if ($MYACCOUNT && $func == "startStream") {
-  $token = $MYACCOUNT['token'];
   $streamer_id = $MYACCOUNT['id'];
+  $lat = getDouble("lat");
+  $lng = getDouble("lng");
   $stream_name = get("stream_name");
   $song = get("song");
   $artist = get("artist");
   $cover_url = get("cover_url");
   $uri = get("uri");
 
-  $db->query("UPDATE accounts SET lat=$lat, lng=$lng WHERE token='$token'");
-  $db->query("INSERT INTO streams VALUES (null, $streamer_id, '$stream_name', '$song', '$artist', '$cover_url', '$uri', '', NOW())");
-  echo json_encode(array("status"=>"ok"));
-}
-
-else if ($MYACCOUNT && $func == "updateStream") {
-  $streamer_id = $MYACCOUNT['id'];
-  $stream_name = get("stream_name");
-  $song = get("song");
-  $artist = get("artist");
-  $cover_url = get("song");
-  $uri = get("uri");
-
-  $db->query("UPDATE streams SET stream_name='$stream_name', song='$song', artist='$artist', cover_url='$cover_url', uri='$uri' WHERE streamer_id=$streamer_id");
+  $existenceCheck = $db->query("SELECT * FROM streams WHERE streamer_id='$streamer_id'")->fetch();
+  if ($existenceCheck) {
+    $db->query("UPDATE streams SET lat=$lat, lng=$lng, stream_name='$stream_name', song='$song', artist='$artist', cover_url='$cover_url', uri='$uri', start=NOW() WHERE streamer_id=$streamer_id");
+    echo json_encode(array("status"=>"ok", "result"=>"updated"));
+  } else {
+    $db->query("INSERT INTO streams VALUES (null, $streamer_id, $lat, $lng, '$stream_name', '$song', '$artist', '$cover_url', '$uri', '', NOW())");
+    echo json_encode(array("status"=>"ok", "result"=>"inserted"));
+  }
   echo json_encode(array("status"=>"ok"));
 }
 
@@ -118,5 +114,5 @@ else echo json_encode(array("status"=>"failed", "message"=>"That function does n
 
 function get($s) { return isset($_GET[$s]) ? addslashes(trim($_GET[$s])) : ""; }
 function getWords($s) { return isset($_GET[$s]) ? ucwords(addslashes(trim($_GET[$s]))) : null; }
-function getInt($s) { return isset($_GET[$s]) ? intval(addslashes(trim($_GET[$s]))) : null; }
-function getDouble($s) { return isset($_GET[$s]) ? doubleval(addslashes(trim($_GET[$s]))) : null; }
+function getInt($s) { return isset($_GET[$s]) ? intval(addslashes(trim($_GET[$s]))) : 0; }
+function getDouble($s) { return isset($_GET[$s]) ? doubleval(addslashes(trim($_GET[$s]))) : 0.0; }

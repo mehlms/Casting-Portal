@@ -18,7 +18,7 @@
 
 <script>
   function login(form) {
-    postImage("/resources/ajax/functions.php", parse(form), function(r) {
+    post("/resources/ajax/functions.php", parse(form), function(r) {
       r = JSON.parse(r)
       if (r["status"] == "ok") window.location = "/"
       addAlert(r["message"])

@@ -49,8 +49,9 @@
           <option value="3">Either</option>
         </select>
       </div>
-      <label>CHARACTER BIO</label><textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Character Description.." name='description_c1'></textarea>
+      <textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Character Description.." name='description_c1'></textarea>
       <input type='button' value='Add Part'>
+      <!-- <h2>Character 1</h2> -->
       <div id="characters"></div>
     </div>
   </div>
