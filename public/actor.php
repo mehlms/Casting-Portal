@@ -9,11 +9,10 @@ foreach ($ASSETS as $asset) if ($asset['type'] == 1) $profilePic = "/resources/a
   <input type='file' id="file" onchange="uploadImage(this)" name='image_upload_file' style="display:none">
   <div class="profile_picture" onclick="document.getElementById('file').click()" id="profile_picture" style="background-image: url('<?php echo $profilePic ?>')"></div>
   <div class="equal">
-    <h1 class='underline'>Actor <input type='button' value='+ SUBSCRIBE' class='subscribe' onclick="subscribe(this)"></h1>
-    <h1><?php echo $USERACCOUNT['firstname']." ".$USERACCOUNT['lastname'] ?></h1>
+    <h1 class='underline'><?php echo $USERACCOUNT['firstname']." ".$USERACCOUNT['lastname'] ?> <input type='button' value='+ SUBSCRIBE' class='subscribe' onclick="subscribe(this)"></h1>
     <h2>
-      <?php echo $USERACCOUNT['email'] ?><br>
-      Age <?php echo date_diff(date_create($USERACCOUNT['birthdate']), date_create('now'))->y ?>, <?php if ($USERACCOUNT["gender"] == 1) echo "Male"; else if ($USERACCOUNT["gender"] == 2) echo "Female" ?>
+      Age <?php echo date_diff(date_create($USERACCOUNT['birthdate']), date_create('now'))->y ?>, <?php if ($USERACCOUNT["gender"] == 1) echo "Male"; else if ($USERACCOUNT["gender"] == 2) echo "Female" ?> <br>
+      Actor <br>
     </h2>
   </div>
 </div>

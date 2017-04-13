@@ -33,12 +33,13 @@ else if ($MYACCOUNT && $func == "complete") {
   $month = getInt("month");
   $day = getInt("day");
   $year = getInt("year");
+  $role = getInt("role");
 
-  if ($gender && $firstname && $lastname && $month && $day && $year) {
+  if ($gender && $firstname && $lastname && $month && $day && $year && $role != -1) {
     if ($month <= 12 && $month >= 0 && $day >= 0 && $day <= 31 && $year >= 0 && $year < 3000) {
       if ($year < 100 && $year >= 17) $year = $year + 1900;
       else if ($year < 100 && $year < 17) $year = $year + 2000;
-      $db->query("UPDATE accounts SET firstname='$firstname', lastname='$lastname', gender=$gender, birthdate=STR_TO_DATE('$month $day $year','%m %d %Y') WHERE token='$token'");
+      $db->query("UPDATE accounts SET firstname='$firstname', lastname='$lastname', gender=$gender, mode='$role', birthdate=STR_TO_DATE('$month $day $year','%m %d %Y') WHERE token='$token'");
       echo json_encode(array("status"=>"ok", "message"=>"Success"));
     } else echo json_encode(array("status"=>"failed", "message"=>"Please enter a valid date of birth"));
   } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
@@ -50,22 +51,21 @@ else if ($MYACCOUNT && $func == "create") {
   $location = get("audition_location");
   $audition_time = get("audition_time");
   $description = get("description");
-  $gender_c1 = getInt("gender_c1");
-  $name_c1 = get("name_c1");
-  $min_age_c1 = getInt("min_age_c1");
-  $max_age_c1 = getInt("max_age_c1");
-  $description_c1 = get("description_c1");
+  $parts = getArray("parts");
 
-  if ($title && $type && $location && $audition_time && $description && $name_c1 && $gender_c1 && $min_age_c1 && $max_age_c1 && $description_c1) {
-    try {
-      $d_id = intval($MYACCOUNT['d_id']);
-      $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $d_id, '$title', $type, '$description', '$location', '$audition_time', NOW())");
-      $call_id = $db->query("SELECT id FROM calls ORDER BY id DESC")->fetch()['id'];
-      $db->query("INSERT INTO characters VALUES (null, $call_id, '$name_c1', '$description_c1', $min_age_c1, $max_age_c1, $gender_c1)");
-      echo json_encode(array("status"=>"ok", "url"=>"/call/".$call_id."/"));
-    } catch (Exception $e) {
-      echo json_encode(array("status"=>"ok", "message"=>$e));
+  if ($title && $type && $location && $audition_time && $description && count($parts) > 0) {
+    $d_id = intval($MYACCOUNT['d_id']);
+    $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $d_id, '$title', $type, '$description', '$location', '$audition_time', NOW())");
+    $call_id = $db->query("SELECT id FROM calls ORDER BY id DESC")->fetch()['id'];
+    foreach ($parts as $part) {
+      $char_name = $part["char_name"];
+      $char_min = $part["char_min"];
+      $char_max = $part["char_max"];
+      $char_gender = $part["char_gender"];
+      $char_description = $part["char_description"];
+      $db->query("INSERT INTO characters VALUES (null, $call_id, '$char_name', '$char_description', $char_min, $char_max, $char_gender)");
     }
+    echo json_encode(array("status"=>"ok", "url"=>"/call/".$call_id."/"));
   } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
 }
 
@@ -116,6 +116,7 @@ else if ($MYACCOUNT && $func == 'uploadImage') {
 else echo json_encode(array("status"=>"failed", "message"=>"That function does not exist"));
 
 function get($s) { return isset($_POST[$s]) ? trim($_POST[$s]) : null; }
+function getArray($s) { return isset($_POST[$s]) ? json_decode($_POST[$s], true) : array(); }
 function getWords($s) { return isset($_POST[$s]) ? ucwords(trim($_POST[$s])) : null; }
 function getInt($s) { return isset($_POST[$s]) ? intval(trim($_POST[$s])) : null; }
 function getDouble($s) { return isset($_POST[$s]) ? doubleval(trim($_POST[$s])) : null; }

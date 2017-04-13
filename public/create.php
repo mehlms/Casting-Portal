@@ -5,8 +5,8 @@
   <div class='div_row'>
     <div class='equal'>
       <h1>Casting Call Details</h1>
-      <label>PROJECT TITLE</label><input type='text' placeholder='Project Title' name='title' spellcheck='false' autocomplete='off' maxlength='40'>
-      <label>TYPE</label><select>
+      <label>PROJECT TITLE</label><input type='text' placeholder='Ex: Black Mass, Clockstoppers, Blur' name='title' spellcheck='false' autocomplete='off' maxlength='40'>
+      <label>TYPE</label><select name="type">
         <option value="1">Undergraduate Visual Storytelling (FTV 130)</option>
         <option value="2">Undergraduate Directing 2 (FP 338)</option>
         <option value="3">Undergraduate Directing 3 (FP 438)</option>
@@ -31,47 +31,98 @@
         <option value="22">Graduate Independent Study</option>
         <option value="23">Other</option>
       </select>
-      <label>WHEN</label><input type='text' placeholder='Audition Time' name='audition_time' spellcheck='false' autocomplete='off' maxlength='20'>
-      <label>WHERE</label><input type='text' placeholder='Audition Location' name='audition_location' spellcheck='false' autocomplete='off' maxlength='40'>
-      <label>STORYLINE</label><textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Project Description..." name="description"></textarea>
+      <label>WHEN & WHERE</label>
+      <textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Ex: 4/9/17 1:30-2:30pm @ DH100" name="audition_time"></textarea>
+      <input type='hidden' value="null" name="audition_location">
+      <label>STORYLINE</label><textarea rows='4' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Ex: 'Black Mass' tells the story of James 'Whitney' Bulger, an Irish street punk who rose to power in organized crime by using his FBI informant status to bring down the Italian mafia in New England." name="description"></textarea>
     </div>
     <div class='equal'>
       <h1>Characters</h1>
-      <label>CHARACTER DETAILS</label>
+      <label>CHARACTER INPUT</label>
       <div class="row">
-        <input type='text' placeholder='Character Name' name='name_c1' spellcheck='false' autocomplete='off' maxlength='40'>
-        <input type='text' placeholder='Min Age' name='min_age_c1' spellcheck='false' autocomplete='off' maxlength='40' style='flex-grow:.5'>
-        <input type='text' placeholder='Max Age' name='max_age_c1' spellcheck='false' autocomplete='off' maxlength='40' style='flex-grow:.5'>
-        <select name="gender_c1" style='flex-grow:.5'>
+        <input type='text' placeholder='Character Name' spellcheck='false' autocomplete='off' maxlength='40' id="char_name">
+        <input type='text' placeholder='Min Age' spellcheck='false' autocomplete='off' maxlength='40' style='flex-grow:.5' id="char_min">
+        <input type='text' placeholder='Max Age' spellcheck='false' autocomplete='off' maxlength='40' style='flex-grow:.5' id="char_max">
+        <select style='flex-grow:.5' id="char_gender">
           <option value="0">Gender</option>
           <option value="1">Male</option>
           <option value="2">Female</option>
           <option value="3">Either</option>
         </select>
       </div>
-      <textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Character Description.." name='description_c1'></textarea>
-      <input type='button' value='Add Part'>
-      <!-- <h2>Character 1</h2> -->
-      <div id="characters"></div>
+      <textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Character Description.." id="char_description"></textarea>
+      <input type='button' value='Add Character' onclick="addPart()">
+      <label>ADDED CHARACTERS</label>
+      <div id="parts"></div>
     </div>
   </div>
   <input type='submit' value='Post Casting Call'>
 </form>
 
 <script>
-  var characters = {}
+  var parts = []
+
+  refresh()
 
   function create(form) {
-    post("/resources/ajax/functions.php", parse(form), function(r) {
-      r = JSON.parse(r)
+    var formData = parse(form)
+    formData["parts"] = JSON.stringify(parts)
+    post("/resources/ajax/functions.php", formData, function(r) {
       console.log(r)
+      r = JSON.parse(r)
       if (r["status"] == "ok") window.location = r["url"]
       addAlert(r["message"])
     })
   }
 
-  function addCharacter() {
-    document.getElementById("characters").innerHTML = ""
+  function removePart(ind) {
+    parts.splice(ind, 1)
+    refresh()
+  }
+
+  function addPart() {
+    var charName = document.getElementById("char_name")
+    var charMin = document.getElementById("char_min")
+    var charMax = document.getElementById("char_max")
+    var charGender = document.getElementById("char_gender")
+    var charDescription = document.getElementById("char_description")
+
+    if (charName.value != "" && charMin.value != "" && charMax.value != "" && charGender.value != "" && charDescription.value != "") {
+      parts.push({"char_name": charName.value, "char_min": charMin.value, "char_max": charMax.value, "char_gender": charGender.value, "char_description": charDescription.value})
+      changeValue("char_name", "")
+      changeValue("char_min", "")
+      changeValue("char_max", "")
+      changeValue("char_gender", 0)
+      changeValue("char_description", "")
+      refresh()
+    } else {
+      addAlert("Please fill in all character fields.")
+    }
+  }
+
+  function refresh() {
+    document.getElementById("parts").innerHTML = ""
+
+    if (parts.length > 0) {
+      for (var i = 0; i < parts.length; i++) {
+        document.getElementById("parts").innerHTML += "<div class='part' onclick='selectPart("+i+")'>" + parts[i]["char_name"] + "</div> <a onclick='removePart("+i+")'>remove</a><br>"
+      }
+    } else {
+      document.getElementById("parts").innerHTML = "No Characters Added"
+    }
+  }
+
+  function selectPart(id) {
+    changeValue("char_name", parts[id]["char_name"])
+    changeValue("char_min", parts[id]["char_min"])
+    changeValue("char_max", parts[id]["char_max"])
+    changeValue("char_gender", parts[id]["char_gender"])
+    changeValue("char_description", parts[id]["char_description"])
+  }
+
+  function changeValue(id, value) {
+    document.getElementById(id).value = value
+    document.getElementById(id).click()
   }
 </script>
 

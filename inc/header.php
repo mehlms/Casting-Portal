@@ -88,18 +88,14 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
         if ($MYACCOUNT && $MYACCOUNT['firstname'] != null) {
           if ($MYACCOUNT['mode']) {
             echo "
-              <select onchange='toggleMode(this.value)' style='background-color:#fff;width: auto;'>
-                  <option value='0'>Actor</option>
-                  <option value='1' selected>Director</option>
-              </select>
               <a href='/director/".$MYACCOUNT['d_id']."/' id='account'></a>
             ";
           } else {
+              // <select onchange='toggleMode(this.value)' style='background-color:#fff;width: auto;'>
+              //     <option value='0' selected>Actor</option>
+              //     <option value='1'>Director</option>
+              // </select>
             echo "
-              <select onchange='toggleMode(this.value)' style='background-color:#fff;width: auto;'>
-                  <option value='0' selected>Actor</option>
-                  <option value='1'>Director</option>
-              </select>
               <a href='/actor/".$MYACCOUNT['a_id']."/' id='account'></a>
             ";
           }
@@ -114,12 +110,13 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
         echo "
           <a href='/create/'>POST CALL</a>
           <a href='/my_calls/'>MY CALLS</a>
-          <a href='/my_calls/'>BROWSE TALENT</a>
         ";
-      } else if ($MYACCOUNT) {
+      } else if ($MYACCOUNT && $MYACCOUNT['firstname'] != "") {
         echo "
           <a href='/'>OPEN CALLS</a>
         ";
+      } else {
+        echo "";
       }
       ?>
     </div>

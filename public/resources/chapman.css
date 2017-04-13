@@ -83,7 +83,7 @@ body {
   width: 100%;
 }
 
-.row > input, .row > label, .row > select {
+.row > input, .row > label, .row > select, .row > textarea {
   margin-left: 2px;
   margin-right: 2px;
   flex-grow: 1;
@@ -91,8 +91,8 @@ body {
   width: 100%;
 }
 
-.row > input:first-child, .row > label:first-child, .row > select:first-child { margin-left: 0; }
-.row > input:last-child, .row > label:last-child, .row > select:last-child { margin-right: 0; }
+.row > input:first-child, .row > label:first-child, .row > select:first-child, .row > textarea:first-child { margin-left: 0; }
+.row > input:last-child, .row > label:last-child, .row > select:last-child, .row > textarea:last-child { margin-right: 0; }
 
 form {
   width: 100%;
@@ -247,6 +247,7 @@ h2 {
 
 a {
   color: #98002e;
+  cursor: pointer;
 }
 
 b {
@@ -275,6 +276,21 @@ b {
 
 .profile_picture:hover {
   background-color: rgba(0,0,0,.1);
+}
+
+#parts {
+  text-align: left;
+}
+
+.part {
+  display: inline-block;
+  margin-bottom: 5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.red {
+  color: #98002e;
 }
 
 @font-face {
