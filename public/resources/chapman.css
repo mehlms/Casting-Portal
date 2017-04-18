@@ -39,7 +39,7 @@ body {
   font-size: 20px;
   font-weight: 100;
   font-family: 'futura-pt';
-  margin-bottom: 35px;
+  margin-bottom: 40px;
   text-align: right;
   border-bottom: 1px solid #ddd;
 }
@@ -291,6 +291,48 @@ b {
 
 .red {
   color: #98002e;
+}
+
+.call-header {
+  display: block;
+  text-align: center;
+  font-family: "futura-pt";
+  text-transform: uppercase;
+}
+
+.call-header .c1 {
+  font-size: 33px;
+  margin-bottom: 30px;
+}
+
+.call-header .c2 {
+  font-size: 64px;
+  font-weight: 600;
+  color: #98002e;
+  margin-bottom: 50px;
+}
+
+.call-items {
+  font-family: "futura-pt";
+  margin-bottom: 10px;
+}
+
+.call-items .c1 {
+  font-size: 16px;
+  font-weight: 800;
+  display: inline-block;
+  width: 150px;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+
+.call-items .c2 {
+  display: inline-block;
+  font-size: 24px;
+}
+
+.call-part {
+
 }
 
 @font-face {

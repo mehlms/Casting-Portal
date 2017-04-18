@@ -48,14 +48,13 @@ else if ($MYACCOUNT && $func == "complete") {
 else if ($MYACCOUNT && $func == "create") {
   $title = getWords("title");
   $type = getInt("type");
-  $location = get("audition_location");
   $audition_time = get("audition_time");
   $description = get("description");
   $parts = getArray("parts");
 
-  if ($title && $type && $location && $audition_time && $description && count($parts) > 0) {
+  if ($title && $type && $audition_time && $description && count($parts) > 0) {
     $d_id = intval($MYACCOUNT['d_id']);
-    $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $d_id, '$title', $type, '$description', '$location', '$audition_time', NOW())");
+    $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $d_id, '$title', $type, '$description', 'nothing', '$audition_time', NOW())");
     $call_id = $db->query("SELECT id FROM calls ORDER BY id DESC")->fetch()['id'];
     foreach ($parts as $part) {
       $char_name = $part["char_name"];
@@ -115,8 +114,8 @@ else if ($MYACCOUNT && $func == 'uploadImage') {
 }
 else echo json_encode(array("status"=>"failed", "message"=>"That function does not exist"));
 
-function get($s) { return isset($_POST[$s]) ? trim($_POST[$s]) : null; }
+function get($s) { return isset($_POST[$s]) ? addslashes(trim($_POST[$s])) : null; }
 function getArray($s) { return isset($_POST[$s]) ? json_decode($_POST[$s], true) : array(); }
-function getWords($s) { return isset($_POST[$s]) ? ucwords(trim($_POST[$s])) : null; }
-function getInt($s) { return isset($_POST[$s]) ? intval(trim($_POST[$s])) : null; }
-function getDouble($s) { return isset($_POST[$s]) ? doubleval(trim($_POST[$s])) : null; }
+function getWords($s) { return isset($_POST[$s]) ? addslashes(ucwords(trim($_POST[$s]))) : null; }
+function getInt($s) { return isset($_POST[$s]) ? addslashes(intval(trim($_POST[$s]))) : null; }
+function getDouble($s) { return isset($_POST[$s]) ? addslashes(doubleval(trim($_POST[$s]))) : null; }
