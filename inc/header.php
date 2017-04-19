@@ -7,7 +7,7 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Casting Couch | Chapman University</title>
+  <title>Casting Portal | Chapman University</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <link rel='stylesheet' href='/resources/chapman.css'>

@@ -17,10 +17,13 @@ $db->query("CREATE TABLE characters (id INT PRIMARY KEY AUTO_INCREMENT, call_id 
 $db->query("CREATE TABLE assets (id INT PRIMARY KEY AUTO_INCREMENT, page_id BIGINT, url VARCHAR(100), type INT, sort INT)");
 $db->query("CREATE TABLE notifications (id INT PRIMARY KEY AUTO_INCREMENT, type INT, a_id BIGINT, d_id BIGINT, char_id INT, created DATETIME)");
 
-$db->query("INSERT INTO api VALUES (null, 'helms107@mail.chapman.edu', '1234')");
-$db->query("INSERT INTO api VALUES (null, 'hewit110@mail.chapman.edu', '1234')");
-$db->query("INSERT INTO api VALUES (null, 'hutzl102@mail.chapman.edu', '1234')");
+// $db->query("INSERT INTO api VALUES (null, 'helms107@mail.chapman.edu', '1234')");
+// $db->query("INSERT INTO api VALUES (null, 'hewit110@mail.chapman.edu', '1234')");
+// $db->query("INSERT INTO api VALUES (null, 'hutzl102@mail.chapman.edu', '1234')");
 $db->query("INSERT INTO api VALUES (null, 'guest@mail.chapman.edu', '1234')");
+$db->query("INSERT INTO api VALUES (null, 'guest2@mail.chapman.edu', '1234')");
+$db->query("INSERT INTO api VALUES (null, 'guest3@mail.chapman.edu', '1234')");
+$db->query("INSERT INTO api VALUES (null, 'guest4@mail.chapman.edu', '1234')");
 
 ?>
 
