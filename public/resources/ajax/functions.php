@@ -48,13 +48,14 @@ else if ($MYACCOUNT && $func == "complete") {
 else if ($MYACCOUNT && $func == "create") {
   $title = getWords("title");
   $type = getInt("type");
-  $audition_time = get("audition_time");
+  $audition_dates = get("audition_dates");
+  $shooting_dates = get("shooting_dates");
   $description = get("description");
   $parts = getArray("parts");
 
-  if ($title && $type && $audition_time && $description && count($parts) > 0) {
+  if ($title && $type && $audition_dates && $shooting_dates && $description && count($parts) > 0) {
     $d_id = intval($MYACCOUNT['d_id']);
-    $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $d_id, '$title', $type, '$description', 'nothing', '$audition_time', NOW())");
+    $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $d_id, '$title', $type, '$description', '$audition_dates', '$shooting_dates', NOW())");
     $call_id = $db->query("SELECT id FROM calls ORDER BY id DESC")->fetch()['id'];
     foreach ($parts as $part) {
       $char_name = $part["char_name"];
@@ -78,8 +79,9 @@ else if ($MYACCOUNT && $func == 'interested') {
       $db->query("DELETE FROM notifications WHERE type=1 AND a_id=$a_id AND d_id=$d_id AND char_id=$char_id");
       echo json_encode(array("status"=>"ok", "message"=>"You have revoked your interest", "interested"=>0));
     } else {
+      $name = $db->query("SELECT firstname, lastname FROM accounts WHERE d_id=$d_id")->fetch();
       $db->query("INSERT INTO notifications VALUES (null, 1, $a_id, $d_id, $char_id, NOW())");
-      echo json_encode(array("status"=>"ok", "message"=>"The director has been notified", "interested"=>1));
+      echo json_encode(array("status"=>"ok", "message"=>strtoupper($name['firstname'])." ".strtoupper($name['lastname'])." has been notified", "interested"=>1));
     }
   } catch (Exception $e) {
     echo json_encode(array("status"=>"failed", "message"=>$e));

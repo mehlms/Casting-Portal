@@ -1,5 +1,5 @@
 <?php include "../inc/header.php";
-$CALL = $db->query("SELECT calls.id, title, description, firstname, lastname, calls.d_id, audition_time, audition_location, type FROM calls JOIN accounts ON calls.d_id=accounts.d_id WHERE calls.id='$data'")->fetch();
+$CALL = $db->query("SELECT calls.id, title, description, firstname, lastname, calls.d_id, audition_dates, shooting_dates, type FROM calls JOIN accounts ON calls.d_id=accounts.d_id WHERE calls.id='$data'")->fetch();
 $type = array("Undergraduate Visual Storytelling (FTV 130)",
 "Undergraduate Directing 2 (FP 338)",
 "Undergraduate Directing 3 (FP 438)",
@@ -33,8 +33,9 @@ $type = array("Undergraduate Visual Storytelling (FTV 130)",
 </div>
 <div class='call-items'>
   <div class='c1'>Director:</div><div class='c2'><a href='/director/<?php echo $CALL['d_id'] ?>/'><?php echo $CALL['firstname']." ".$CALL['lastname'] ?></a></div><br>
-  <div class='c1'>Type:</div><div class='c2'><?php echo $type ?></div><br>
-  <div class='c1'>Audition:</div><div class='c2'><?php echo $CALL['audition_time'] ?></div><br>
+  <div class='c1'>Level:</div><div class='c2'><?php echo $type ?></div><br>
+  <div class='c1'>Shooting:</div><div class='c2'><?php echo $CALL['shooting_dates'] ?></div><br>
+  <div class='c1'>Audition:</div><div class='c2'><?php echo $CALL['audition_dates'] ?></div><br>
   <div class='c1'>Storyline:</div><div class='c2'><?php echo $CALL['description'] ?></div><br>
 </div>
 
@@ -44,23 +45,42 @@ $type = array("Undergraduate Visual Storytelling (FTV 130)",
 <?php
 $CHARACTERS = $db->query("SELECT id, name, description, min_age, max_age, gender FROM characters WHERE call_id='$data'");
 foreach ($CHARACTERS->fetchAll() as $character) {
-  $interested = $db->query("SELECT id FROM notifications WHERE type=1 AND d_id=".$CALL['d_id']." AND char_id=".$character['id']." AND a_id=".$MYACCOUNT['a_id'])->fetch() ? "INTERESTED" : "+ I'M INTERESTED IN ".$character['name'];
+  $isInterestedString = "- REVOKE INTEREST";
+  $isNotInterestedString = "+ SUBMIT INTEREST FOR ".$character['name'];
+  $interested = $db->query("SELECT id FROM notifications WHERE type=1 AND d_id=".$CALL['d_id']." AND char_id=".$character['id']." AND a_id=".$MYACCOUNT['a_id'])->fetch() ? $isInterestedString : $isNotInterestedString;
   $gender = ($character['gender'] == 1) ? "Male" : "Female";
-  echo "
-  <div class='call-part'>
-    <div class='c1'>
-      ".$character['name']."
-      <div class='c2'>
-        ".$character['min_age']."-".$character['max_age']." years<br>
-        ".$gender."
+  if ($MYACCOUNT['mode'] == 0) {
+    echo "
+    <div class='call-part'>
+      <div class='c1'>
+        ".$character['name']."
+        <div class='c2'>
+          ".$character['min_age']."-".$character['max_age']." years<br>
+          ".$gender."
+        </div>
+      </div>
+      <div class='c3'>
+        ".$character['description']."
+      </div>
+      <input type='button' value=\"".$interested."\" class='subscribe' data-interested='".$isNotInterestedString."' onclick='interested(this, \"".$CALL['d_id']."\", \"".$character['id']."\")'>
+    </div>
+    ";
+  } else {
+    echo "
+    <div class='call-part'>
+      <div class='c1'>
+        ".$character['name']."
+        <div class='c2'>
+          ".$character['min_age']."-".$character['max_age']." years<br>
+          ".$gender."
+        </div>
+      </div>
+      <div class='c3'>
+        ".$character['description']."
       </div>
     </div>
-    <div class='c3'>
-      ".$character['description']."
-    </div>
-    <input type='button' value=\"".$interested."\" class='subscribe' onclick='interested(this, \"".$CALL['d_id']."\", \"".$character['id']."\")'>
-  </div>
-  ";
+    ";
+  }
 }
 ?>
 
@@ -68,8 +88,8 @@ foreach ($CHARACTERS->fetchAll() as $character) {
   function interested(sender, d_id, char_id) {
     post("/resources/ajax/functions.php", {'func': 'interested', 'd_id': d_id, 'char_id': char_id}, function(r) {
       r = JSON.parse(r)
-      if (r['status'] == 'ok' && r['interested']) sender.value = "INTERESTED"
-      if (r['status'] == 'ok' && !r['interested']) sender.value = "+ I'M INTERESTED"
+      if (r['status'] == 'ok' && r['interested']) sender.value = "- REVOKE INTEREST"
+      if (r['status'] == 'ok' && !r['interested']) sender.value = sender.getAttribute("data-interested")
       addAlert(r["message"])
     })
   }

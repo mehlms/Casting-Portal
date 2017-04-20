@@ -31,8 +31,10 @@
         <option value="22">Graduate Independent Study</option>
         <option value="23">Other</option>
       </select>
-      <label>WHEN & WHERE</label>
-      <textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Ex: 4/9/17 1:30-2:30pm @ DH100" name="audition_time"></textarea>
+      <label>AUDITION WHEN & WHERE</label>
+      <textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Ex: 4/9/17 1:30-2:30pm @ DH100" name="audition_dates"></textarea>
+      <label>SHOOTING DATES</label>
+      <textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Ex: 9/14/17-9/17/17, 9/24/17-9/27/17" name="shooting_dates"></textarea>
       <label>STORYLINE</label><textarea rows='4' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Ex: 'Black Mass' tells the story of James 'Whitney' Bulger, an Irish street punk who rose to power in organized crime by using his FBI informant status to bring down the Italian mafia in New England." name="description"></textarea>
     </div>
     <div class='equal'>

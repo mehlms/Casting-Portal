@@ -39,7 +39,7 @@ body {
   font-size: 20px;
   font-weight: 100;
   font-family: 'futura-pt';
-  margin-bottom: 40px;
+  margin-bottom: 45px;
   text-align: right;
   border-bottom: 1px solid #ddd;
 }
@@ -142,6 +142,7 @@ input[type='submit'], input[type='button'] {
   border: none;
   color: white;
   font-weight: 600;
+  padding: 10px 14px;
 }
 
 select {
@@ -315,16 +316,16 @@ b {
 }
 
 .call-items {
+  margin-bottom: 20px;
   font-family: "futura-pt";
-  margin-bottom: 15px;
 }
 
 .call-items .c1 {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   display: inline-block;
   width: 150px;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
   text-transform: uppercase;
 }
 
