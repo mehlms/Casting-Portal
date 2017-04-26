@@ -74,7 +74,7 @@ body {
 }
 
 .div_row > div {
-  padding: 30px;
+  padding: 0 30px 30px 30px;
 }
 
 .row {
@@ -214,7 +214,7 @@ h1 {
   font-weight: 800;
   font-family: "futura-pt";
   margin-bottom: 25px;
-  /*text-align: center;*/
+  text-align: center;
 }
 
 h2 {
@@ -226,7 +226,7 @@ h2 {
 
 .underline {
   border-bottom: 1px solid #bbb;
-  padding-bottom: 12px;
+  padding-bottom: 14px;
   margin-bottom: 14px;
   /*text-align: left;*/
 }
@@ -261,6 +261,7 @@ b {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
 }
 
 .profile_picture {
@@ -279,6 +280,11 @@ b {
 
 .profile_picture:hover {
   background-color: rgba(0,0,0,.1);
+}
+
+.profile_videos {
+  float: right;
+  width: 355px;
 }
 
 #parts {
@@ -304,12 +310,12 @@ b {
 }
 
 .call-header .c1 {
-  font-size: 33px;
+  font-size: 30px;
   margin-bottom: 30px;
 }
 
 .call-header .c2 {
-  font-size: 64px;
+  font-size: 60px;
   font-weight: 600;
   color: #98002e;
   margin-bottom: 60px;

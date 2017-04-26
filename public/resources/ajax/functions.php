@@ -18,7 +18,7 @@ if ($func == "login") {
       } else { // IF THE USER HAS NEVER LOGGED IN
         $username = explode("@", $email)[0];
         $token = sha1(time().rand());
-        $db->query("INSERT INTO accounts VALUES (null, (SELECT UUID_short()), (SELECT UUID_short()), 0, '$token', '$email', null, null, null, null, 0, 0, 0, NOW(), NOW())");
+        $db->query("INSERT INTO accounts VALUES (null, (SELECT UUID_short()), (SELECT UUID_short()), '', '', 0, '$token', '$email', null, null, null, null, 0, 0, 0, NOW(), NOW())");
         setCookie("token", $token, time()+3600*24*365, "/");
       }
       echo json_encode(array("status"=>"ok"));
@@ -40,6 +40,28 @@ else if ($MYACCOUNT && $func == "complete") {
       if ($year < 100 && $year >= 17) $year = $year + 1900;
       else if ($year < 100 && $year < 17) $year = $year + 2000;
       $db->query("UPDATE accounts SET firstname='$firstname', lastname='$lastname', gender=$gender, mode='$role', birthdate=STR_TO_DATE('$month $day $year','%m %d %Y') WHERE token='$token'");
+      echo json_encode(array("status"=>"ok", "message"=>"Success"));
+    } else echo json_encode(array("status"=>"failed", "message"=>"Please enter a valid date of birth"));
+  } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
+}
+
+else if ($MYACCOUNT && $func == "updateInfo") {
+  $firstname = getWords("firstname");
+  $lastname = getWords("lastname");
+  $month = getInt("month");
+  $day = getInt("day");
+  $year = getInt("year");
+  $bio = get("bio");
+
+  if ($firstname && $lastname && $month && $day && $year) {
+    if ($month <= 12 && $month >= 0 && $day >= 0 && $day <= 31 && $year >= 0 && $year < 3000) {
+      if ($year < 100 && $year >= 17) $year = $year + 1900;
+      else if ($year < 100 && $year < 17) $year = $year + 2000;
+      if ($MYACCOUNT['mode'] == 1) {
+        $db->query("UPDATE accounts SET d_bio='$bio', firstname='$firstname', lastname='$lastname', birthdate=STR_TO_DATE('$month $day $year','%m %d %Y') WHERE token='$token'");
+      } else {
+        $db->query("UPDATE accounts SET a_bio='$bio', firstname='$firstname', lastname='$lastname', birthdate=STR_TO_DATE('$month $day $year','%m %d %Y') WHERE token='$token'");
+      }
       echo json_encode(array("status"=>"ok", "message"=>"Success"));
     } else echo json_encode(array("status"=>"failed", "message"=>"Please enter a valid date of birth"));
   } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
@@ -111,9 +133,40 @@ else if ($MYACCOUNT && $func == 'uploadImage') {
   imagecopyresampled($dst, $src, 0, 0, $xPos, $yPos, 250, 250, $width, $height);
   imagejpeg($dst, "../assets/profile/".$filename, 100);
   $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
-  $db->query("INSERT INTO assets VALUES (null, $page_id, '$filename', 1, 1)");
+  $db->query("INSERT INTO assets VALUES (null, $page_id, '', '$filename', 1)");
   echo json_encode(array("status"=>"ok", "message"=>"Updated", "filename"=>$filename));
 }
+
+else if ($MYACCOUNT && $func == 'addVideo') {
+  $title = get("title");
+  $youtubeLink = get('youtubeLink');
+  $vimeoLink = get('vimeoLink');
+  $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
+  if ($title && ($youtubeLink || $vimeoLink)) {
+    if ($youtubeLink) {
+      preg_match('/v=([^&]*)/', $youtubeLink, $matches);
+      if ($matches) {
+        $link = $matches[1];
+        $db->query("INSERT INTO assets VALUES (null, $page_id, '$title', '$link', 2, NOW())");
+        echo json_encode(array("status"=>"ok", "message"=>"Added Video"));
+      } else {
+        echo json_encode(array("status"=>"failed", "message"=>"Invalid URL"));
+      }
+    } else if ($vimeoLink) {
+      preg_match('/\.com\/(.*)/', $vimeoLink, $matches);
+      if ($matches) {
+        $link = $matches[1];
+        $db->query("INSERT INTO assets VALUES (null, $page_id, '$title', '$link', 3, NOW())");
+        echo json_encode(array("status"=>"ok", "message"=>"Added Video"));
+      } else {
+        echo json_encode(array("status"=>"failed", "message"=>"Invalid URL"));
+      }
+    }
+  } else {
+    echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
+  }
+}
+
 else echo json_encode(array("status"=>"failed", "message"=>"That function does not exist"));
 
 function get($s) { return isset($_POST[$s]) ? addslashes(trim($_POST[$s])) : null; }

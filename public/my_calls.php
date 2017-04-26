@@ -1,5 +1,6 @@
 <?php include "../inc/header.php"; ?>
 
+<!-- <h1>My Calls</h1> -->
 <?php
 $d_id = $MYACCOUNT['d_id'];
 $CALLS = $db->query("SELECT id, title FROM calls WHERE d_id=$d_id")->fetchAll();
@@ -26,7 +27,7 @@ if (count($CALLS) > 0) {
     echo "<br>";
   }
 } else {
-  echo "<h2>You have not posted a call yet.</h2>";
+  echo "<h2>No calls yet.</h2>";
 }
 ?>
 
