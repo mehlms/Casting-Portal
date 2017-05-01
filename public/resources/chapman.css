@@ -211,7 +211,7 @@ textarea {
   resize: none;
 }
 select {
-  background: url('/resources/images/arrow_down.png') no-repeat center right 11px;
+  background: white url('/resources/images/arrow_down.png') no-repeat center right 11px;
   cursor: pointer;
 }
 
