@@ -1,6 +1,7 @@
 <?php include "db.php";
 if (!$MYACCOUNT && $_SERVER['REQUEST_URI'] != "/login/") header("Location: /login/"); // IF USER IS NOT LOGGED IN -> REDIRECT TO /LOGIN/
 else if ($MYACCOUNT && $MYACCOUNT['firstname'] == NULL && $_SERVER['REQUEST_URI'] != "/complete/") header("Location: /complete/");
+// else if ($MYACCOUNT && $MYACCOUNT['firstname'] && (strpos($_SERVER['REQUEST_URI'], 'complete') || strpos($_SERVER['REQUEST_URI'], 'login'))) header("Location: /");
 $data = isset($_GET['data']) ? $_GET['data'] : null;
 ?>
 
@@ -11,8 +12,7 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <link rel='stylesheet' href='/resources/chapman.css'>
-  <!-- <script src="//use.typekit.net/eyn5jyy.js" type="text/javascript"></script> -->
-  <!-- <script type='text/javascript'>try {Typekit.load()} catch(e) {}</script> -->
+
   <script type='text/javascript'>
     function post(url, data, callback) {
       var r = new XMLHttpRequest()
@@ -46,7 +46,7 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
       if (document.getElementById("alerts").children.length == 1) {
         setTimeout(function() {
           dismissAlert(e)
-        }, 2500)
+        }, 3000)
       }
     }
 
@@ -60,65 +60,91 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
           var next = document.getElementById("alerts").lastChild
           setTimeout(function() {
             dismissAlert(next)
-          }, 1500)
+          }, 3000)
         }, 400)
       }
     }
 
-    function toggleMode(mode) {
-      window.location = "/toggle/" + mode + "/"
+    function checkDate(ev, input) {
+      input.value = input.value.replace(/[^0-9\/]/g,'')
+      if (input.value.length == 2 || input.value.length == 5) {
+        if (ev.keyCode == 8) input.value = input.value.substring(0, input.value.length-1)
+        else input.value += "/"
+      }
     }
-    </script>
+
+    function checkDateTime(ev, input) {
+      input.value = input.value.replace(/[^0-9\/\s:amp]/g,'')
+      if (input.value.length == 2 || input.value.length == 5) {
+        if (ev.keyCode == 8) input.value = input.value.substring(0, input.value.length-1)
+        else input.value += "/"
+      }
+      if (input.value.length == 10 || input.value.length == 16) {
+        if (ev.keyCode == 8) input.value = input.value.substring(0, input.value.length-1)
+        else input.value += " "
+      }
+      if (input.value.length == 13) {
+        if (ev.keyCode == 8) input.value = input.value.substring(0, input.value.length-1)
+        else input.value += ":"
+      }
+    }
+
+    var notifications = false
+    function toggleNotifications() {
+      if (notifications) {
+        document.getElementById("notifications").style.width = "0px"
+        document.getElementById("c_notifications").className = "c_notifications"
+      } else {
+        document.getElementById("notifications").style.width = "280px"
+        document.getElementById("c_notifications").className = "c_notifications notif_active"
+      }
+      notifications = !notifications
+    }
+
+    currentPopup = null
+    function togglePopup(popup) {
+      if (currentPopup) {
+        currentPopup.style.top = "0px"
+        currentPopup.style.opacity = 0
+        document.getElementById("darkness").style.opacity = 0
+        setTimeout(function() {
+          document.getElementById("darkness").style.display = "none"
+          currentPopup.style.display = "none"
+          currentPopup = null
+        }, 300)
+      } else {
+        currentPopup = popup
+        currentPopup.style.display = "block"
+        document.getElementById("darkness").style.display = "block"
+        setTimeout(function() {
+          currentPopup.style.opacity = 1
+          currentPopup.style.top = "87px"
+          document.getElementById("darkness").style.opacity = 1
+        }, 1)
+      }
+    }
+  </script>
 </head>
 <body>
   <div id="alerts"></div>
   <div id="header">
-    <a href='/' id="cu_logo"></a>
-    <div style='text-align:right'>
-      <div id='search' class='equal'>
-        <select class='type' name='search_type'>
+    <a href='/' class="c_logo"></a>
+    <?php if ($MYACCOUNT && $MYACCOUNT['firstname'] != null) {
+      echo "
+      <div id='notifications'>
+        <h1>Notifications</h1>
+      </div>
+      <div class='c_notifications' onclick='toggleNotifications()' id='c_notifications'></div>
+      <div class='c_search'>
+        <select class='c_type'>
             <option value='All'>All</option>
             <option value='Blog Stories'>Actors</option>
             <option value='Faculty Directory'>Directors</option>
             <option value='Events'>Casting Calls</option>
         </select>
-        <input type='text' class='query' placeholder='Search' spellcheck='false' autocomplete='off' maxlength='40' name='email'>
+        <input type='text' class='c_query' placeholder='Search' spellcheck='false' autocomplete='off' maxlength='40'>
       </div>
-      <?php
-        if ($MYACCOUNT && $MYACCOUNT['firstname'] != null) {
-          if ($MYACCOUNT['mode']) {
-            echo "
-              <a href='/director/".$MYACCOUNT['d_id']."/' id='account'></a>
-            ";
-          } else {
-              // <select onchange='toggleMode(this.value)' style='background-color:#fff;width: auto;'>
-              //     <option value='0' selected>Actor</option>
-              //     <option value='1'>Director</option>
-              // </select>
-            echo "
-              <a href='/actor/".$MYACCOUNT['a_id']."/' id='account'></a>
-            ";
-          }
-        }
-      ?>
-    </div>
-  </div>
-  <div id='nav'>
-    <div class='master'>
-      <?php
-      if ($MYACCOUNT && $MYACCOUNT['mode']) {
-        echo "
-          <a href='/create/'>POST CALL</a>
-          <a href='/my_calls/'>MY CALLS</a>
-        ";
-      } else if ($MYACCOUNT && $MYACCOUNT['firstname'] != "") {
-        echo "
-          <a href='/'>OPEN CALLS</a>
-        ";
-      } else {
-        echo "";
-      }
-      ?>
-    </div>
+      ";
+    } ?>
   </div>
   <div class="master">

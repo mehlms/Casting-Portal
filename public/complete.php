@@ -1,33 +1,39 @@
 <?php include "../inc/header.php" ?>
 
-<div id="center">
+<div class="center">
   <div>
-    <h1>Complete Your Profile</h1>
-    Please include some basic information to continue. <br>
-    <div class='spacer'></div>
-    <form onsubmit='complete(this); return false' class='f2 right'>
+    <h1>Almost There</h1>
+    <p>Complete your basic information to enter.</p>
+    <form onsubmit='complete(this); return false'>
       <input type='hidden' name='func' value='complete'>
-      <div class="row">
-        <input type='text' placeholder='Firstname' name='firstname' spellcheck='false' autocomplete='off' maxlength='40'>
-        <input type='text' placeholder='Lastname' name='lastname' spellcheck='false' autocomplete='off' maxlength='40'>
-      </div>
-      <div class="row">
-        <input type='text' placeholder='Birth Month' name='month' spellcheck='false' autocomplete='off' maxlength='2'>
-        <input type='text' placeholder='Birth Day' name='day' spellcheck='false' autocomplete='off' maxlength='2'>
-        <input type='text' placeholder='Birth Year' name='year' spellcheck='false' autocomplete='off' maxlength='4'>
-      </div>
-      <div class="row">
+      <label>
+        <p>Role</p>
+        <select name="role">
+          <option value="-1">Select</option>
+          <option value="1">Director</option>
+          <option value="0">Actor</option>
+        </select><br>
+      </label><br>
+      <label>
+        <p>Gender</p>
         <select name="gender">
-          <option value="0">Gender</option>
+          <option value="0">Select</option>
           <option value="1">Male</option>
           <option value="2">Female</option>
         </select>
-        <select name="role">
-          <option value="-1">Select Role</option>
-          <option value="0">Actor</option>
-          <option value="1">Director</option>
-        </select>
-      </div>
+      </label><br>
+      <label>
+        <p>Firstname</p>
+        <input type='text' name='firstname' spellcheck='false' autocomplete='off' maxlength='40'>
+      </label><br>
+      <label>
+        <p>Lastname</p>
+        <input type='text' name='lastname' spellcheck='false' autocomplete='off' maxlength='40'>
+      </label><br>
+      <label>
+        <p>Date of Birth</p>
+        <input type='text' name='birthdate' spellcheck='false' autocomplete='off' maxlength='10' placeholder='mm/dd/YYYY' onkeyup="checkDate(event, this)">
+      </label><br>
       <input type='submit' value='Complete My Profile'>
     </form>
   </div>
@@ -36,7 +42,12 @@
 <script>
   function complete(form) {
     post("/resources/ajax/functions.php", parse(form), function(r) {
-      r = JSON.parse(r)
+      try {
+        r = JSON.parse(r)
+      } catch (e) {
+        console.log(r)
+        return
+      }
       if (r["status"] == "ok") window.location = "/"
       addAlert(r["message"])
     })

@@ -1,16 +1,12 @@
 <?php include "../inc/header.php" ?>
 
-<div id="center">
+<div class="center">
   <div>
     <h1>Authenticate</h1>
-    Please login with your Chapman ID to access the casting portal. <br>
-    <div class='spacer'></div>
-    <form onsubmit='login(this); return false' class='f1 right'>
+    <p>Please login with your Chapman ID to access the COPA casting portal.</p>
+    <form onsubmit='login(this); return false'>
       <input type='hidden' name='func' value='login'>
-      <div class='row'>
-        <input type='text' placeholder='Email' spellcheck='false' autocomplete='off' maxlength='40' name='email'>
-        <input type='password' placeholder='Password' spellcheck='false' maxlength='40' name='password'>
-      </div>
+      <input type='text' placeholder='Email' spellcheck='false' autocomplete='off' maxlength='40' name='email'><input type='password' placeholder='Password' spellcheck='false' maxlength='40' name='password'><br>
       <input type='submit' value='Login'>
     </form>
   </div>
