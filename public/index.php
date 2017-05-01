@@ -11,6 +11,9 @@ foreach ($assets->fetchAll() as $asset) {
   else if ($asset['type'] == 2) array_push($asset_photos, $asset);
   else if ($asset['type'] == 3 || $asset['type'] == 4) array_push($asset_videos, $asset);
 }
+
+$bio = $MYACCOUNT['mode'] ? $MYACCOUNT['d_bio'] : $MYACCOUNT['a_bio'];
+
 ?>
 
 <!-- POPUPS -->
@@ -21,11 +24,11 @@ foreach ($assets->fetchAll() as $asset) {
     <h1>Update Your Information</h1>
     <label>
       <p>Firstname</p>
-      <input type='text' id="input_firstname" name='firstname' spellcheck='false' autocomplete='off' maxlength='20'>
+      <input type='text' name='firstname' value="<?php echo $MYACCOUNT['firstname'] ?>" spellcheck='false' autocomplete='off' maxlength='20'>
     </label>
     <label>
       <p>Lastname</p>
-      <input type='text' id="input_lastname" name='lastname' spellcheck='false' autocomplete='off' maxlength='20'>
+      <input type='text' name='lastname' value="<?php echo $MYACCOUNT['lastname'] ?>" spellcheck='false' autocomplete='off' maxlength='20'>
     </label>
     <label>
       <p>Date of Birth</p>
@@ -158,7 +161,7 @@ foreach ($assets->fetchAll() as $asset) {
   <form class='popup_form' onsubmit='updateBio(this); return false'>
     <input type="hidden" name="func" value="updateBio">
     <h1>Your Bio</h1>
-    <textarea id="input_bio" rows='5' spellcheck='false' autocomplete='off' maxlength='1000' name="bio" placeholder="Profile pictures speak 1,000 words but your's speaks 'cutey pie' so why not fill in the rest."></textarea>
+    <textarea id="input_bio" rows='5' spellcheck='false' autocomplete='off' maxlength='1000' name="bio" placeholder="Profile pictures speak 1,000 words but your's speaks 'cutey pie' so why not fill in the rest."><?php echo $bio ?></textarea>
     <input type='submit' value='Update Bio'>
   </form>
 </div>
@@ -203,14 +206,16 @@ foreach ($assets->fetchAll() as $asset) {
 
 <div class='card'>
   <h1>Calls</h1>
-  <p>You have no casting calls. <a href='#' onclick="togglePopup(document.getElementById('popup_call'))">Create Call?</a></p>
+  <p>You have no casting calls. <a onclick="togglePopup(document.getElementById('popup_call'))">Create Call?</a></p>
 </div>
 
 <div class='card_column_left'>
   <div class='card'>
     <input type='button' class='card_edit' value="edit" onclick="togglePopup(document.getElementById('popup_bio'))">
     <h1>Bio</h1>
-    <p id="bio"></p>
+    <p>
+      <?php echo $bio != "" ? $bio : "You have no bio. <a onclick=\"togglePopup(document.getElementById('popup_bio'))\">Add a Bio?</a>" ?>
+    </p>
   </div>
   <div class='card'>
     <h1>Followers</h1>
@@ -223,37 +228,23 @@ foreach ($assets->fetchAll() as $asset) {
     <input type='file' id="add_photo_file" onchange="profilePic(this)" style="display:none" accept="image/x-png,image/jpeg">
     <input type='button' style='font-size: 19px' class='card_edit' value="+" onclick="document.getElementById('add_photo_file').click()">
     <h1>Photos</h1>
-    <p>You have no photos. <a href='#' onclick="document.getElementById('add_photo_file').click()">Add a Photo?</a></p>
+    <p>You have no photos. <a onclick="document.getElementById('add_photo_file').click()">Add a Photo?</a></p>
   </div>
   <div class='card'>
     <input type='button' style='font-size: 19px' class='card_edit' value="+" onclick="togglePopup(document.getElementById('popup_videos'))">
     <h1>Videos</h1>
-    <p>You have no videos. <a href='#' onclick="togglePopup(document.getElementById('popup_videos'))">Add a Video?</a></p>
+    <p>You have no videos. <a onclick="togglePopup(document.getElementById('popup_videos'))">Add a Video?</a></p>
   </div>
   <div class='card'>
     <input type='button' class='card_edit' value="edit" onclick="togglePopup(document.getElementById('popup_recommendations'))">
     <h1>Recommendations</h1>
-    <p>You have no recommendations. <a href='#' onclick="togglePopup(document.getElementById('popup_recommendations'))">Request a Recommendation?</a></p>
+    <p>You have no recommendations. <a onclick="togglePopup(document.getElementById('popup_recommendations'))">Request a Recommendation?</a></p>
   </div>
 </div>
 
 <!-- SCRIPTS -->
 
 <script>
-  var firstname = "<?php echo $MYACCOUNT['firstname'] ?>"
-  var lastname = "<?php echo $MYACCOUNT['lastname'] ?>"
-  var bio = "<?php echo $MYACCOUNT['mode'] ? $MYACCOUNT['d_bio'] : $MYACCOUNT['a_bio'] ?>"
-
-  refreshData()
-  function refreshData() {
-    document.getElementById("name").innerHTML = firstname + " " + lastname
-    document.getElementById("input_firstname").value = firstname
-    document.getElementById("input_lastname").value = lastname
-
-    document.getElementById("bio").innerHTML = bio != "" ? bio : "You have no bio. <a href='#' onclick=\"togglePopup(document.getElementById('popup_bio'))\">Add a Bio?</a>"
-    document.getElementById("input_bio").value = bio != "" ? bio : ""
-  }
-
   function profilePic(input) {
     if (input.files[0].size <= 500000) {
       post("/resources/ajax/functions.php", {"func": "profilePic", "image": input.files[0]}, function(r) {
@@ -270,9 +261,10 @@ foreach ($assets->fetchAll() as $asset) {
     post("/resources/ajax/functions.php", form, function(r) {
       r = JSON.parse(r)
       if (r["status"] == "ok") {
-        bio = form["bio"]
-        refreshData()
         togglePopup()
+        setTimeout(function() {
+          window.location.href = "/"
+        },300)
       } else addAlert(r['message'])
     })
   }
@@ -282,10 +274,10 @@ foreach ($assets->fetchAll() as $asset) {
     post("/resources/ajax/functions.php", form, function(r) {
       r = JSON.parse(r)
       if (r["status"] == "ok") {
-        firstname = form["firstname"]
-        lastname = form["lastname"]
-        refreshData()
         togglePopup()
+        setTimeout(function() {
+          window.location.href = "/"
+        },300)
       } else addAlert(r['message'])
     })
   }
