@@ -120,7 +120,7 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
           currentPopup.style.opacity = 1
           currentPopup.style.top = "87px"
           document.getElementById("darkness").style.opacity = 1
-        }, 1)
+        }, 33)
       }
     }
   </script>

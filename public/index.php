@@ -193,7 +193,7 @@ foreach ($assets->fetchAll() as $asset) {
     <p><b><?php echo $MYACCOUNT['mode'] ? "Director" : "Talent" ?> · <?php echo ($MYACCOUNT["gender"] == 1) ? "Male" : "Female"; ?> · Age <?php echo date_diff(date_create($MYACCOUNT['birthdate']), date_create('now'))->y ?></b></p>
   </div>
   <div class='c_buttons'>
-    <input type='button' value='Toggle to <?php echo $MYACCOUNT['mode'] ? "Talent" : "Director" ?> Mode' onclick="window.location.pathname='/toggle/'"><br>
+    <input type='button' value='Toggle to <?php echo $MYACCOUNT['mode'] ? "Talent" : "Director" ?> Mode' onclick="window.location.href='/toggle/'"><br>
     <input type='button' value='Update Basic Info' onclick="togglePopup(document.getElementById('popup_basic'))"><br>
     <input type='button' value='Edit Notifications' onclick="togglePopup(document.getElementById('popup_notifications'))">
   </div>
