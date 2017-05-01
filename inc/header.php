@@ -127,6 +127,7 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
 </head>
 <body>
   <div id="alerts"></div>
+  <div id="darkness" onclick="togglePopup(null)"></div>
   <div id="header">
     <a href='/' class="c_logo"></a>
     <?php if ($MYACCOUNT && $MYACCOUNT['firstname'] != null) {
@@ -137,10 +138,10 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
       <div class='c_notifications' onclick='toggleNotifications()' id='c_notifications'></div>
       <div class='c_search'>
         <select class='c_type'>
-            <option value='All'>All</option>
-            <option value='Blog Stories'>Actors</option>
-            <option value='Faculty Directory'>Directors</option>
-            <option value='Events'>Casting Calls</option>
+            <option value='0'>All</option>
+            <option value='1'>Calls</option>
+            <option value='2'>Talent</option>
+            <option value='3'>Directors</option>
         </select>
         <input type='text' class='c_query' placeholder='Search' spellcheck='false' autocomplete='off' maxlength='40'>
       </div>

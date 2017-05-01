@@ -16,24 +16,24 @@ foreach ($assets->fetchAll() as $asset) {
 <!-- POPUPS -->
 
 <div id="popup_basic" class='card popup'>
-  <form class='popup_form'>
+  <form class='popup_form' onsubmit='updateInfo(this); return false'>
+    <input type="hidden" name="func" value="updateInfo">
     <h1>Update Your Information</h1>
     <label>
       <p>Firstname</p>
-      <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='19' value="<?php echo $MYACCOUNT['firstname']; ?>">
+      <input type='text' id="input_firstname" name='firstname' spellcheck='false' autocomplete='off' maxlength='20'>
     </label>
     <label>
       <p>Lastname</p>
-      <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='19' value="<?php echo $MYACCOUNT['lastname']; ?>">
+      <input type='text' id="input_lastname" name='lastname' spellcheck='false' autocomplete='off' maxlength='20'>
     </label>
     <label>
       <p>Date of Birth</p>
-      <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='19' placeholder='mm/dd/YYYY' value="<?php $birthdate = new DateTime($MYACCOUNT['birthdate']); echo $birthdate->format('m/d/Y'); ?>" onkeyup="checkDate(event, this)">
+      <input type='text' name='birthdate' spellcheck='false' autocomplete='off' maxlength='19' placeholder='mm/dd/YYYY' value="<?php $birthdate = new DateTime($MYACCOUNT['birthdate']); echo $birthdate->format('m/d/Y'); ?>" onkeyup="checkDate(event, this)">
     </label>
     <input type='submit' value='Update Information'>
   </form>
 </div>
-
 <div id="popup_notifications" class='card popup'>
   <form class='popup_form'>
     <h1>Edit Notification Settings</h1>
@@ -65,10 +65,9 @@ foreach ($assets->fetchAll() as $asset) {
     <input type='submit' value='Update Settings'>
   </form>
 </div>
-
 <div id="popup_call" class='card popup'>
   <form class='popup_form'>
-    <h1>Create Casting Call</h1>
+    <h1>Create Call</h1>
     <label>
       <p>Title</p>
       <input type='text' name='title' spellcheck='false' autocomplete='off' maxlength='100' placeholder="Guardians of the Galaxy"><br>
@@ -110,7 +109,7 @@ foreach ($assets->fetchAll() as $asset) {
         <p>Place</p>
         <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='19' placeholder="Dodge Rm 100">
       </label>
-      <div class='input_add'>+</div>
+      <div class='label_add'>+</div>
     </div>
     <div class='row'>
       <label>
@@ -121,7 +120,7 @@ foreach ($assets->fetchAll() as $asset) {
         <p>To</p>
         <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='19' placeholder='mm/dd/YYYY' onkeyup="checkDate(event, this)">
       </label>
-      <div class='input_add'>+</div>
+      <div class='label_add'>+</div>
     </div>
     <label>
       <p>Storyline</p>
@@ -149,22 +148,21 @@ foreach ($assets->fetchAll() as $asset) {
           <option value="3">Female</option>
         </select>
       </label>
-      <div class='input_add'>+</div>
+      <div class='label_add'>+</div>
     </div>
     <textarea rows='2' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Any more additional information pertaining to this actor or character?"></textarea>
-    <input type='submit' value='Create Casting Call'><input type='submit' value='Upload Script'>
+    <input type='submit' value='Create Casting Call'><input type='button' value='Upload Script'>
   </form>
 </div>
-
 <div id="popup_bio" class='card popup'>
-  <form class='popup_form'>
+  <form class='popup_form' onsubmit='updateBio(this); return false'>
+    <input type="hidden" name="func" value="updateBio">
     <h1>Your Bio</h1>
-    <textarea rows='5' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Profile pictures speak 1,000 words but your's speaks 'cutey pie' so why not fill in the rest."></textarea>
+    <textarea id="input_bio" rows='5' spellcheck='false' autocomplete='off' maxlength='1000' name="bio" placeholder="Profile pictures speak 1,000 words but your's speaks 'cutey pie' so why not fill in the rest."></textarea>
     <input type='submit' value='Update Bio'>
   </form>
 </div>
-
-<div id="popup_video" class='card popup'>
+<div id="popup_videos" class='card popup'>
   <form class='popup_form'>
     <h1>Add a Video</h1>
     <label>
@@ -181,26 +179,23 @@ foreach ($assets->fetchAll() as $asset) {
         <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='40' placeholder="https://vimeo.com/67790369">
       </label>
     </div>
-    <input type='submit' value='Add Your Dumbass Video'>
+    <input type='submit' value='Add Video'>
   </form>
 </div>
-<div id="darkness" onclick="togglePopup(null)"></div>
 
 <!-- PROFILE HEADER -->
 
 <div id='profile'>
-  <input type='file' id="file" onchange="profilePic(this)" style="display:none">
-  <div class='c_pic' id='profile_pic' onclick="document.getElementById('file').click()" style="background-image: url('<?php echo $asset_profile; ?>')"></div>
+  <input type='file' id="profile_pic_file" onchange="profilePic(this)" style="display:none" accept="image/x-png,image/jpeg">
+  <div class='c_pic' id='profile_pic' onclick="document.getElementById('profile_pic_file').click()" style="background-image: url('<?php echo $asset_profile; ?>')"></div>
   <div class='card'>
-    <h1><?php echo $MYACCOUNT['firstname']." ".$MYACCOUNT['lastname'] ?></h1>
-    <p><b><?php echo $MYACCOUNT['mode'] ? "Director" : "Actor" ?> - <?php echo ($MYACCOUNT["gender"] == 1) ? "Male" : "Female"; ?> - Age <?php echo date_diff(date_create($MYACCOUNT['birthdate']), date_create('now'))->y ?></b></p>
+    <h1 id="name"><?php echo $MYACCOUNT['firstname']." ".$MYACCOUNT['lastname'] ?></h1>
+    <p><b><?php echo $MYACCOUNT['mode'] ? "Director" : "Talent" ?> · <?php echo ($MYACCOUNT["gender"] == 1) ? "Male" : "Female"; ?> · Age <?php echo date_diff(date_create($MYACCOUNT['birthdate']), date_create('now'))->y ?></b></p>
   </div>
   <div class='c_buttons'>
-    <div class='master'>
-      <input type='button' value='Toggle to <?php echo $MYACCOUNT['mode'] ? "Actor" : "Director" ?> Mode' onclick="window.location.pathname='/toggle/'"><br>
-      <input type='button' value='Update Basic Info' onclick="togglePopup(document.getElementById('popup_basic'))"><br>
-      <input type='button' value='Edit Notifications' onclick="togglePopup(document.getElementById('popup_notifications'))">
-    </div>
+    <input type='button' value='Toggle to <?php echo $MYACCOUNT['mode'] ? "Talent" : "Director" ?> Mode' onclick="window.location.pathname='/toggle/'"><br>
+    <input type='button' value='Update Basic Info' onclick="togglePopup(document.getElementById('popup_basic'))"><br>
+    <input type='button' value='Edit Notifications' onclick="togglePopup(document.getElementById('popup_notifications'))">
   </div>
 </div>
 
@@ -211,42 +206,88 @@ foreach ($assets->fetchAll() as $asset) {
   <p>You have no casting calls. <a href='#' onclick="togglePopup(document.getElementById('popup_call'))">Create Call?</a></p>
 </div>
 
-<div class='card card_left'>
-  <h1>Bio</h1>
-  <p>You have no bio. <a href='#' onclick="togglePopup(document.getElementById('popup_bio'))">Add Bio?</a></p>
-</div>
-<div class='card card_right'>
-  <h1>Photos</h1>
-  <p>You have no photos. <a href='#'>Add Photo?</a></p>
-</div>
-
-<div class='card card_left'>
-  <h1>Followers</h1>
-  <p>You have no followers.</p>
-</div>
-<div class='card card_right'>
-  <h1>Videos</h1>
-  <p>You have no videos. <a href='#' onclick="togglePopup(document.getElementById('popup_video'))">Add Video?</a></p>
+<div class='card_column_left'>
+  <div class='card'>
+    <input type='button' class='card_edit' value="edit" onclick="togglePopup(document.getElementById('popup_bio'))">
+    <h1>Bio</h1>
+    <p id="bio"></p>
+  </div>
+  <div class='card'>
+    <h1>Followers</h1>
+    <p>You have no followers.</p>
+  </div>
 </div>
 
-<div class='card card_left ghost'></div>
-<div class='card card_right'>
-  <h1>Recommendations</h1>
-  <p>You have no recommendations. <a href='#'>Request a Recommendation?</a></p>
+<div class='card_column_right'>
+  <div class='card'>
+    <input type='file' id="add_photo_file" onchange="profilePic(this)" style="display:none" accept="image/x-png,image/jpeg">
+    <input type='button' style='font-size: 19px' class='card_edit' value="+" onclick="document.getElementById('add_photo_file').click()">
+    <h1>Photos</h1>
+    <p>You have no photos. <a href='#' onclick="document.getElementById('add_photo_file').click()">Add a Photo?</a></p>
+  </div>
+  <div class='card'>
+    <input type='button' style='font-size: 19px' class='card_edit' value="+" onclick="togglePopup(document.getElementById('popup_videos'))">
+    <h1>Videos</h1>
+    <p>You have no videos. <a href='#' onclick="togglePopup(document.getElementById('popup_videos'))">Add a Video?</a></p>
+  </div>
+  <div class='card'>
+    <input type='button' class='card_edit' value="edit" onclick="togglePopup(document.getElementById('popup_recommendations'))">
+    <h1>Recommendations</h1>
+    <p>You have no recommendations. <a href='#' onclick="togglePopup(document.getElementById('popup_recommendations'))">Request a Recommendation?</a></p>
+  </div>
 </div>
 
 <!-- SCRIPTS -->
 
 <script>
+  var firstname = "<?php echo $MYACCOUNT['firstname'] ?>"
+  var lastname = "<?php echo $MYACCOUNT['lastname'] ?>"
+  var bio = "<?php echo $MYACCOUNT['mode'] ? $MYACCOUNT['d_bio'] : $MYACCOUNT['a_bio'] ?>"
+
+  refreshData()
+  function refreshData() {
+    document.getElementById("name").innerHTML = firstname + " " + lastname
+    document.getElementById("input_firstname").value = firstname
+    document.getElementById("input_lastname").value = lastname
+
+    document.getElementById("bio").innerHTML = bio != "" ? bio : "You have no bio. <a href='#' onclick=\"togglePopup(document.getElementById('popup_bio'))\">Add a Bio?</a>"
+    document.getElementById("input_bio").value = bio != "" ? bio : ""
+  }
+
   function profilePic(input) {
     if (input.files[0].size <= 500000) {
       post("/resources/ajax/functions.php", {"func": "profilePic", "image": input.files[0]}, function(r) {
         console.log(r)
         r = JSON.parse(r)
-        if (r['status'] == 'ok') document.getElementById("profile_pic").style.backgroundImage = "url('/resources/assets/profile/"+r['filename']+"')"
+        if (r['status'] == 'ok') document.getElementById("profile_pic").style.backgroundImage = "url('/resources/assets/profile/"+r['filename']+"?t="+Math.random()+"')"
         addAlert(r['message'])
       })
     } else addAlert("That file is larger than 500kb")
+  }
+
+  function updateBio(form) {
+    form = parse(form)
+    post("/resources/ajax/functions.php", form, function(r) {
+      r = JSON.parse(r)
+      if (r["status"] == "ok") {
+        bio = form["bio"]
+        refreshData()
+        togglePopup()
+      } else addAlert(r['message'])
+    })
+  }
+
+  function updateInfo(form) {
+    form = parse(form)
+    post("/resources/ajax/functions.php", form, function(r) {
+      r = JSON.parse(r)
+      if (r["status"] == "ok") {
+        firstname = form["firstname"]
+        lastname = form["lastname"]
+        refreshData()
+        togglePopup()
+      } else addAlert(r['message'])
+    })
   }
 </script>
 

@@ -115,15 +115,16 @@ else if ($MYACCOUNT && $func == 'profilePic') {
     $yPos = ($height - $width) / 2;
     $height = $width;
   }
-  $filename = time().rand().".jpg";
   $dst = imagecreatetruecolor(250, 250);
   imagecopyresampled($dst, $src, 0, 0, $xPos, $yPos, 250, 250, $width, $height);
-  imagejpeg($dst, "../assets/profile/".$filename, 100);
   $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
-  $existenceCheck = $db->query("SELECT id FROM assets WHERE page_id=$page_id AND type=1")->fetch();
+  $filename = ($MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id']).".jpg";
+  $existenceCheck = $db->query("SELECT url FROM assets WHERE page_id=$page_id AND type=1")->fetch();
   if ($existenceCheck) {
-    $db->query("UPDATE assets SET url='$filename', added=NOW() WHERE page_id=$page_id AND type=1");
+    $filename = $existenceCheck['url'];
+    imagejpeg($dst, "../assets/profile/".$filename, 100);
   } else {
+    imagejpeg($dst, "../assets/profile/".$filename, 100);
     $db->query("INSERT INTO assets VALUES (null, $page_id, '', '$filename', 1, NOW())");
   }
   echo json_encode(array("status"=>"ok", "message"=>getConfirmation(), "filename"=>$filename));
@@ -155,11 +156,18 @@ else if ($MYACCOUNT && $func == 'addVideo') {
   }
 }
 
-else echo json_encode(array("status"=>"failed", "message"=>"That function does not exist"));
+else if ($MYACCOUNT && $func == "updateBio") {
+  $bio = get("bio");
+  if ($MYACCOUNT['mode']) $db->query("UPDATE accounts SET d_bio='$bio' WHERE token='$token'");
+  else $db->query("UPDATE accounts SET a_bio='$bio' WHERE token='$token'");
+  echo json_encode(array("status"=>"ok", "message"=>"Updated Bio"));
+}
+
+else echo json_encode(array("status"=>"failed", "message"=>"That function does not exist", "func"=>$func));
 
 function getConfirmation() {
   $confirmations = array("Nice one :)", "It's lit!", "Dope pic", "10/10 would recommend", "Good taste!", "You look beautiful :)", "Gorgeus Face", "Damn shawty get low");
-  return $confirmations[rand(0, count($confirmations))];
+  return $confirmations[rand(0, count($confirmations)-1)];
 }
 function get($s) { return isset($_POST[$s]) ? addslashes(trim($_POST[$s])) : null; }
 function getArray($s) { return isset($_POST[$s]) ? json_decode($_POST[$s], true) : array(); }

@@ -11,7 +11,7 @@
         <select name="role">
           <option value="-1">Select</option>
           <option value="1">Director</option>
-          <option value="0">Actor</option>
+          <option value="0">Talent</option>
         </select><br>
       </label><br>
       <label>

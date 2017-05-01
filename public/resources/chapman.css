@@ -23,6 +23,7 @@
     src: url("/resources/fonts/futura-pt-100.woff2") format('woff2');
     font-weight: 100;
 }
+
 .alert-container {
   display: block;
   text-align: right;
@@ -49,6 +50,22 @@
   bottom: 0px;
   right: 10px;
 }
+#darkness {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.87);
+  top: 0;
+  left: 0;
+  z-index: 9;
+  cursor: pointer;
+  transition: opacity .3s;
+  opacity: 0;
+  display: none;
+}
+::-webkit-input-placeholder {
+  color: rgba(0,0,0,.5);
+}
 
 * {
   padding: 0;
@@ -66,7 +83,6 @@
   -moz-appearance: none;
   box-sizing: border-box;
 }
-
 body {
   font: 14px/20px "proxima-nova", verdana, sans-serif;
   background-color: #eaeaea;
@@ -75,13 +91,11 @@ body {
   background-position-y: 66px;
   letter-spacing: 0.2px;
 }
-
 .master {
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
 }
-
 .center {
   display: flex;
   align-items: center;
@@ -98,11 +112,10 @@ body {
   background-color: #fff;
   height: 67px;
   width: 100%;
-  padding: 0 21px;
+  padding: 0 26px;
   border-bottom: 1px solid #cfcfcf;
   margin-bottom: 19px;
 }
-
 #header .c_logo {
   background: url('/resources/images/chapman.png');
   background-repeat: no-repeat;
@@ -113,22 +126,21 @@ body {
   vertical-align: top;
   margin-top: 19px;
 }
-
 #header .c_search {
   display: inline-block;
   float: right;
   vertical-align: top;
-  margin-top: 16px;
+  margin-top: 15px;
 }
-
 #header .c_type {
   color: #444;
   border-radius: 4px 0px 0px 4px;
-  width: 125px;
+  width: 115px;
   height: 37px;
   margin: 0;
+  border-right: none;
+  background-color: #cfcfcf;
 }
-
 #header .c_query {
   width: 246px;
   border-radius: 0px 4px 4px 0px;
@@ -136,8 +148,8 @@ body {
   background: url('/resources/images/search.png') no-repeat center right 8px;
   margin: 0;
   float: right;
+  border-left: none;
 }
-
 #header .c_notifications {
   cursor: pointer;
   height: 38px;
@@ -148,11 +160,14 @@ body {
   float: right;
   margin-left: 40px;
   margin-top: 14px;
-  margin-right: 5px;
   transition: filter 0.3s;
 }
+#header .notif_active {
+  -webkit-filter: invert(100%);
+  filter: invert(100%);
+}
 
-#header #notifications {
+#notifications {
   overflow: hidden;
   width: 0;
   transition: width 0.3s;
@@ -167,12 +182,10 @@ body {
   color: white;
   text-align: center;
   padding: 16px 0;
-  border-top-left-radius: 6px;
+  border-top-left-radius: 4px;
 }
-
-#header .notif_active {
-  -webkit-filter: invert(100%);
-  filter: invert(100%);
+#notifications h1 {
+  font-weight: 400;
 }
 
 input, select, textarea {
@@ -183,52 +196,40 @@ input, select, textarea {
   margin: 0 4px;
   margin-bottom: 10px;
   width: 299px;
+  border: 1px solid #ddd;
 }
-
 input[type='submit'], input[type='button'] {
   float: right;
   width: auto;
   border-radius: 10px;
   cursor: pointer;
-  border: none;
-  color: white;
   font-weight: 600;
   padding: 9px 13px;
-}
-
-input[type='button'] {
-  float: none;
   pointer-events: all;
 }
-
 textarea {
   resize: none;
-  border: 1px solid #cfcfcf;
 }
-
 select {
-  background: url('/resources/images/arrow_down.png') #cfcfcf no-repeat center right 11px;
+  background: url('/resources/images/arrow_down.png') no-repeat center right 11px;
   cursor: pointer;
-  border: none;
 }
 
 label {
   display: inline-block;
   text-align: left;
 }
-
 label p {
   font-weight: 600;
   margin-bottom: 4px;
   margin-left: 5px;
 }
-
-.input_add {
+.label_add {
   display: inline-block;
   position: absolute;
   margin-top: 33px;
   margin-left: 12px;
-  font-size: 22px;
+  font-size: 19px;
   cursor: pointer;
 }
 
@@ -237,46 +238,32 @@ h1 {
   font-weight: 600;
   margin-bottom: 9px;
 }
-
-#notifications h1 {
-  font-weight: 400;
-}
-
 h2 {
   color: #FF0035;
   letter-spacing: 1.3px;
   font-weight: 600;
   text-align: left;
 }
-
 p {
   margin-bottom: 8px;
 }
-
 a {
   color: #98002e;
   cursor: pointer;
 }
-
 b {
   font-weight: 600;
 }
 
-::-webkit-input-placeholder {
-  color: rgba(0,0,0,.4);
-}
-
 /*SHARED STYLES*/
 
-input, select, textarea, .c_pic, .card {
-  box-shadow: 0 1px 2px rgba(0,0,0,0.17);
+input, select, textarea, #profile .c_pic, .card {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
   transition: box-shadow 0.3s;
 }
-
 input:focus, select:focus, input[type='submit']:hover, input[type='button']:hover {
   box-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
-
 a, input[type='submit'], input[type='button'] {
   color: #FF0035;
 }
@@ -289,6 +276,7 @@ a, input[type='submit'], input[type='button'] {
   width: 100%;
   text-align: center;
   margin-bottom: 24px;
+  position: relative;
 }
 #profile .c_pic {
   display: inline-block;
@@ -312,19 +300,15 @@ a, input[type='submit'], input[type='button'] {
 #profile .card {
   display: inline-block !important;
   text-align: left !important;
-  padding: 20px 15px 11px 40px;
+  padding: 20px 16px 11px 40px;
   margin-top: 62px;
   margin-left: -25px;
+  width: auto;
 }
 #profile .c_buttons {
-  text-align: right;
   position: absolute;
-  width: 100%;
-  left: 0;
-  top: 85px;
-  height: 205px;
-  display: flex;
-  align-items: center;
+  right: 0;
+  top: 31px;
   pointer-events: none;
 }
 
@@ -332,24 +316,31 @@ a, input[type='submit'], input[type='button'] {
   background: white;
   border-radius: 10px;
   text-align: center;
-  padding: 28px 10px 25px;
+  padding: 28px 30px 25px;
   margin-bottom: 20px;
-  display: block;
+  display: inline-block;
+  position: relative;
+  width: 100%;
 }
 .card > p:last-child, .popup_form > input {
   margin-bottom: 0;
 }
-.card_left {
-  width: 337px;
+.card_column_left {
+  width: 35%;
   float:left;
-  margin-right: 19px;
 }
-.card_right {
-  overflow: auto;
+.card_column_right {
+  width: 63%;
+  float: right;
 }
-.ghost {
+.card_ghost {
   background: none !important;
   box-shadow: none !important;
+}
+.card_edit {
+  position: absolute;
+  right: -14px;
+  top: -11px;
 }
 
 .popup {
@@ -393,17 +384,4 @@ a, input[type='submit'], input[type='button'] {
 }
 .popup .row label {
   width: 253px;
-}
-#darkness {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.87);
-  top: 0;
-  left: 0;
-  z-index: 9;
-  cursor: pointer;
-  transition: opacity .3s;
-  opacity: 0;
-  display: none;
 }
