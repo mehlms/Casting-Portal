@@ -15,6 +15,7 @@
 <script>
   function login(form) {
     post("/resources/ajax/functions.php", parse(form), function(r) {
+      console.log(r)
       r = JSON.parse(r)
       if (r["status"] == "ok") window.location = "/"
       addAlert(r["message"])

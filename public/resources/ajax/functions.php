@@ -93,7 +93,7 @@ else if ($MYACCOUNT && $func == 'interested') {
     echo json_encode(array("status"=>"ok", "message"=>"You have revoked your interest", "interested"=>0));
   } else {
     $db->query("INSERT INTO notifications VALUES (null, $a_id, $call_id, $char_id, NOW())");
-    echo json_encode(array("status"=>"ok", "message"=>strtoupper("The casting team has been notified", "interested"=>1));
+    echo json_encode(array("status"=>"ok", "message"=>"The casting team has been notified", "interested"=>1));
   }
 }
 
