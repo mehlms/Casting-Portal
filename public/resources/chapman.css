@@ -261,7 +261,7 @@ input, select, textarea, #profile .c_pic, .card {
   box-shadow: 0 1px 2px rgba(0,0,0,0.2);
   transition: box-shadow 0.3s;
 }
-input:focus, select:focus, input[type='submit']:hover, input[type='button']:hover {
+input:focus, select:focus, input[type='submit']:hover, input[type='button']:hover, textarea:focus {
   box-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
 a, input[type='submit'], input[type='button'] {

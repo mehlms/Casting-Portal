@@ -179,9 +179,9 @@ else if ($MYACCOUNT && $func == 'addVideo') {
         echo json_encode(array("status"=>"ok", "message"=>"Added Video"));
       } else echo json_encode(array("status"=>"failed", "message"=>"Invalid URL"));
     } else if ($vimeoLink) {
-      preg_match('/\.com\/(.*)/', $vimeoLink, $matches);
+      preg_match('/vimeo\.com\/(.*)/', $vimeoLink, $matches);
       if ($matches) {
-        $url = $matches[1];
+        $link = $matches[1];
         $db->query("INSERT INTO assets VALUES (null, $page_id, '$title', '$link', 4, NOW())");
         echo json_encode(array("status"=>"ok", "message"=>"Added Video"));
       } else echo json_encode(array("status"=>"failed", "message"=>"Invalid URL"));

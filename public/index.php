@@ -135,15 +135,15 @@ foreach ($assets->fetchAll() as $asset) {
     <div class='row'>
       <label style="width:161px">
         <p>Name</p>
-        <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='19' placeholder='Peter Quill' onkeyup="checkDate(event, this)">
+        <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='19' placeholder='Peter Quill'>
       </label>
       <label style="width:88px">
         <p>Min Age</p>
-        <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='19' placeholder='24' onkeyup="checkDate(event, this)">
+        <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='19' placeholder='24' >
       </label>
       <label style="width:88px">
         <p>Max Age</p>
-        <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='19' placeholder='35' onkeyup="checkDate(event, this)">
+        <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='19' placeholder='35'>
       </label>
       <label style="width:161px">
         <p>Gender</p>
@@ -168,20 +168,21 @@ foreach ($assets->fetchAll() as $asset) {
   </form>
 </div>
 <div id="popup_videos" class='card popup'>
-  <form class='popup_form'>
+  <form class='popup_form' onsubmit='addVideo(this); return false'>
+    <input type="hidden" name="func" value="addVideo">
     <h1>Add a Video</h1>
     <label>
       <p>Title</p>
-      <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='40' placeholder="My Demo Reel">
+      <input type='text' name='title' spellcheck='false' autocomplete='off' maxlength='40' placeholder="My Demo Reel">
     </label>
     <div class='row'>
       <label>
         <p>Youtube Link ...</p>
-        <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='40' placeholder="https://www.youtube.com/watch?v=5mF0le5Y96M">
+        <input type='text' name='youtubeLink' spellcheck='false' autocomplete='off' maxlength='40' placeholder="https://www.youtube.com/watch?v=5mF0le5Y96M">
       </label>
       <label>
         <p>or Vimeo Link</p>
-        <input type='text' name='audition_time' spellcheck='false' autocomplete='off' maxlength='40' placeholder="https://vimeo.com/67790369">
+        <input type='text' name='vimeoLink' spellcheck='false' autocomplete='off' maxlength='40' placeholder="https://vimeo.com/67790369">
       </label>
     </div>
     <input type='submit' value='Add Video'>
@@ -238,7 +239,24 @@ foreach ($assets->fetchAll() as $asset) {
   <div class='card'>
     <input type='button' style='font-size: 19px' class='card_edit' value="+" onclick="togglePopup(document.getElementById('popup_videos'))">
     <h1>Videos</h1>
-    <p>You have no videos. <a onclick="togglePopup(document.getElementById('popup_videos'))">Add a Video?</a></p>
+    <?php
+    if (empty($asset_videos)) echo "<p>You have no videos. <a onclick=\"togglePopup(document.getElementById('popup_videos'))\">Add a Video?</a></p>";
+    foreach ($asset_videos as $asset) {
+      if ($asset['type'] == 3) {
+        echo "
+        <label>
+          <p>".$asset['title']."</p>
+          <iframe src='https://www.youtube.com/embed/".$asset['url']."' width='443' height='250' frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+        </label>";
+      } else if ($asset['type'] == 4) {
+        echo "
+        <label>
+          <p>".$asset['title']."</p>
+          <iframe src='https://player.vimeo.com/video/".$asset['url']."' width='443' height='250' frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+        </label>";
+      }
+    }
+    ?>
   </div>
   <div class='card'>
     <input type='button' class='card_edit' value="edit" onclick="togglePopup(document.getElementById('popup_recommendations'))">
@@ -287,6 +305,20 @@ foreach ($assets->fetchAll() as $asset) {
   function updateInfo(form) {
     form = parse(form)
     post("/resources/ajax/functions.php", form, function(r) {
+      r = JSON.parse(r)
+      if (r["status"] == "ok") {
+        togglePopup()
+        setTimeout(function() {
+          window.location.href = "/"
+        },300)
+      } else addAlert(r['message'])
+    })
+  }
+
+  function addVideo(form) {
+    form = parse(form)
+    post("/resources/ajax/functions.php", form, function(r) {
+      console.log(r)
       r = JSON.parse(r)
       if (r["status"] == "ok") {
         togglePopup()
