@@ -343,6 +343,38 @@ a, input[type='submit'], input[type='button'] {
   top: -11px;
 }
 
+.card .c_photo_container {
+  height: 98px;
+  width: 98px;
+  display: inline-block;
+  vertical-align: top;
+  position: relative;
+  margin: 0 1px 2px;
+  cursor: text;
+}
+.card .c_photo {
+  position: absolute;
+  background: #222 url('') no-repeat center center;
+  background-size: cover;
+  height: 98px;
+  width: 98px;
+  top: 0;
+  left: 0;
+  border-radius: 4px;
+  transition: width 0.3s, height 0.3s, top 0.3s, left 0.3s;
+  pointer-events: none;
+}
+
+.card .c_photo_container:hover .c_photo {
+  border-radius: 10px;
+  z-index: 100;
+  width: 250px;
+  height: 250px;
+  top: -80px;
+  left: -75px;
+  box-shadow: 0 10px 30px rgba(0,0,0, 0.8);
+}
+
 .popup {
   position: absolute;
   top: 0px;
@@ -375,7 +407,7 @@ a, input[type='submit'], input[type='button'] {
 .popup hr {
   border-top: 1px solid #FF0035;
   width: 390px;
-  margin-top: -20px;
+  margin-top: -19px;
   margin-left: 112px;
   position: absolute;
 }

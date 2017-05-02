@@ -2,18 +2,20 @@
 
 $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
 
+$bio = $MYACCOUNT['mode'] ? $MYACCOUNT['d_bio'] : $MYACCOUNT['a_bio'];
+
 $asset_profile = "/resources/images/placeholder.png";
 $asset_videos = array();
 $asset_photos = array();
 $assets = $db->query("SELECT url, title, type FROM assets WHERE page_id='$page_id' ORDER BY added ASC");
 foreach ($assets->fetchAll() as $asset) {
   if ($asset['type'] == 1) $asset_profile = "/resources/assets/profile/".$asset['url'];
-  else if ($asset['type'] == 2) array_push($asset_photos, $asset);
+  else if ($asset['type'] == 2) {
+    $asset['url'] = "/resources/assets/photos/".$asset['url'];
+    array_push($asset_photos, $asset);
+  }
   else if ($asset['type'] == 3 || $asset['type'] == 4) array_push($asset_videos, $asset);
 }
-
-$bio = $MYACCOUNT['mode'] ? $MYACCOUNT['d_bio'] : $MYACCOUNT['a_bio'];
-
 ?>
 
 <!-- POPUPS -->
@@ -190,7 +192,7 @@ $bio = $MYACCOUNT['mode'] ? $MYACCOUNT['d_bio'] : $MYACCOUNT['a_bio'];
 
 <div id='profile'>
   <input type='file' id="profile_pic_file" onchange="profilePic(this)" style="display:none" accept="image/x-png,image/jpeg">
-  <div class='c_pic' id='profile_pic' onclick="document.getElementById('profile_pic_file').click()" style="background-image: url('<?php echo $asset_profile; ?>')"></div>
+  <div class='c_pic' onclick="document.getElementById('profile_pic_file').click()" style="background-image: url('<?php echo $asset_profile; ?>')"></div>
   <div class='card'>
     <h1 id="name"><?php echo $MYACCOUNT['firstname']." ".$MYACCOUNT['lastname'] ?></h1>
     <p><b><?php echo $MYACCOUNT['mode'] ? "Director" : "Talent" ?> · <?php echo ($MYACCOUNT["gender"] == 1) ? "Male" : "Female"; ?> · Age <?php echo date_diff(date_create($MYACCOUNT['birthdate']), date_create('now'))->y ?></b></p>
@@ -208,7 +210,6 @@ $bio = $MYACCOUNT['mode'] ? $MYACCOUNT['d_bio'] : $MYACCOUNT['a_bio'];
   <h1>Calls</h1>
   <p>You have no casting calls. <a onclick="togglePopup(document.getElementById('popup_call'))">Create Call?</a></p>
 </div>
-
 <div class='card_column_left'>
   <div class='card'>
     <input type='button' class='card_edit' value="edit" onclick="togglePopup(document.getElementById('popup_bio'))">
@@ -222,13 +223,17 @@ $bio = $MYACCOUNT['mode'] ? $MYACCOUNT['d_bio'] : $MYACCOUNT['a_bio'];
     <p>You have no followers.</p>
   </div>
 </div>
-
 <div class='card_column_right'>
   <div class='card'>
-    <input type='file' id="add_photo_file" onchange="profilePic(this)" style="display:none" accept="image/x-png,image/jpeg">
-    <input type='button' style='font-size: 19px' class='card_edit' value="+" onclick="document.getElementById('add_photo_file').click()">
+    <input type='file' id="upload_pic" onchange="uploadPic(this)" style="display:none" accept="image/x-png,image/jpeg">
+    <input type='button' style='font-size: 19px' class='card_edit' value="+" onclick="document.getElementById('upload_pic').click()">
     <h1>Photos</h1>
-    <p>You have no photos. <a onclick="document.getElementById('add_photo_file').click()">Add a Photo?</a></p>
+    <?php
+    if (empty($asset_photos)) echo "<p>You have no photos. <a onclick=\"document.getElementById('upload_pic').click()\">Add a Photo?</a></p>";
+    foreach ($asset_photos as $asset) {
+      echo "<div class='c_photo_container'><div class='c_photo' style=\"background-image: url('".$asset['url']."')\"></div></div>";
+    }
+    ?>
   </div>
   <div class='card'>
     <input type='button' style='font-size: 19px' class='card_edit' value="+" onclick="togglePopup(document.getElementById('popup_videos'))">
@@ -248,9 +253,19 @@ $bio = $MYACCOUNT['mode'] ? $MYACCOUNT['d_bio'] : $MYACCOUNT['a_bio'];
   function profilePic(input) {
     if (input.files[0].size <= 500000) {
       post("/resources/ajax/functions.php", {"func": "profilePic", "image": input.files[0]}, function(r) {
+        r = JSON.parse(r)
+        if (r['status'] == 'ok') window.location.href = "/"
+        addAlert(r['message'])
+      })
+    } else addAlert("That file is larger than 500kb")
+  }
+
+  function uploadPic(input) {
+    if (input.files[0].size <= 500000) {
+      post("/resources/ajax/functions.php", {"func": "uploadPic", "image": input.files[0]}, function(r) {
         console.log(r)
         r = JSON.parse(r)
-        if (r['status'] == 'ok') document.getElementById("profile_pic").style.backgroundImage = "url('/resources/assets/profile/"+r['filename']+"?t="+Math.random()+"')"
+        if (r['status'] == 'ok') window.location.href = "/"
         addAlert(r['message'])
       })
     } else addAlert("That file is larger than 500kb")

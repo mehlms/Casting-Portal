@@ -117,8 +117,9 @@ else if ($MYACCOUNT && $func == 'profilePic') {
   }
   $dst = imagecreatetruecolor(250, 250);
   imagecopyresampled($dst, $src, 0, 0, $xPos, $yPos, 250, 250, $width, $height);
-  $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
+
   $filename = ($MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id']).".jpg";
+  $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
   $existenceCheck = $db->query("SELECT url FROM assets WHERE page_id=$page_id AND type=1")->fetch();
   if ($existenceCheck) {
     $filename = $existenceCheck['url'];
@@ -127,7 +128,41 @@ else if ($MYACCOUNT && $func == 'profilePic') {
     imagejpeg($dst, "../assets/profile/".$filename, 100);
     $db->query("INSERT INTO assets VALUES (null, $page_id, '', '$filename', 1, NOW())");
   }
-  echo json_encode(array("status"=>"ok", "message"=>getConfirmation(), "filename"=>$filename));
+  echo json_encode(array("status"=>"ok", "message"=>getConfirmation()));
+}
+
+else if ($MYACCOUNT && $func == 'uploadPic') {
+  $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
+  $photoCount = $db->query("SELECT COUNT(id) FROM assets WHERE page_id=$page_id AND type=2")->fetch();
+  if ($photoCount[0] >= 20) {
+    echo json_encode(array("status"=>"failed", "message"=>"Only 20 pictures allowed"));
+    return;
+  }
+
+  $src = null;
+  if ($_FILES["image"]["type"] == "image/png") $src = imagecreatefrompng($_FILES["image"]["tmp_name"]);
+  else if ($_FILES["image"]["type"] == "image/jpeg") $src = imagecreatefromjpeg($_FILES["image"]["tmp_name"]);
+  else {
+    echo json_encode(array("status"=>"failed", "message"=>".JPG and .PNG only please"));
+    return;
+  }
+  list($width, $height) = getimagesize($_FILES['image']['tmp_name']);
+  $xPos = 0;
+  $yPos = 0;
+  if ($width > $height) {
+    $xPos = ($width - $height) / 2;
+    $width = $height;
+  } else if ($height > $width) {
+    $yPos = ($height - $width) / 2;
+    $height = $width;
+  }
+  $dst = imagecreatetruecolor(250, 250);
+  imagecopyresampled($dst, $src, 0, 0, $xPos, $yPos, 250, 250, $width, $height);
+
+  $filename = time().rand(1000,9999).".jpg";
+  imagejpeg($dst, "../assets/photos/".$filename, 100);
+  $db->query("INSERT INTO assets VALUES (null, $page_id, '', '$filename', 2, NOW())");
+  echo json_encode(array("status"=>"ok", "message"=>getConfirmation()));
 }
 
 else if ($MYACCOUNT && $func == 'addVideo') {
