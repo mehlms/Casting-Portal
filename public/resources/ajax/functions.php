@@ -42,9 +42,10 @@ else if ($MYACCOUNT && $func == "updateInfo") {
   $firstname = getWords("firstname");
   $lastname = getWords("lastname");
   $birthdate = getDateTime("birthdate");
-
+  $bio = get("bio");
   if ($firstname && $lastname && $birthdate) {
-    $db->query("UPDATE accounts SET firstname='$firstname', lastname='$lastname', birthdate='$birthdate' WHERE token='$token'");
+    if ($MYACCOUNT['mode']) $db->query("UPDATE accounts SET d_bio='$bio', firstname='$firstname', lastname='$lastname', birthdate='$birthdate' WHERE token='$token'");
+    else $db->query("UPDATE accounts SET a_bio='$bio', firstname='$firstname', lastname='$lastname', birthdate='$birthdate' WHERE token='$token'");
     echo json_encode(array("status"=>"ok", "message"=>"Success"));
   } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
 }
@@ -97,7 +98,7 @@ else if ($MYACCOUNT && $func == 'interested') {
   }
 }
 
-else if ($MYACCOUNT && $func == 'profilePic') {
+else if ($MYACCOUNT && $func == 'uploadProfilePic') {
   $src = null;
   if ($_FILES["image"]["type"] == "image/png") $src = imagecreatefrompng($_FILES["image"]["tmp_name"]);
   else if ($_FILES["image"]["type"] == "image/jpeg") $src = imagecreatefromjpeg($_FILES["image"]["tmp_name"]);
@@ -105,62 +106,64 @@ else if ($MYACCOUNT && $func == 'profilePic') {
     echo json_encode(array("status"=>"failed", "message"=>".JPG and .PNG only please"));
     return;
   }
+
   list($width, $height) = getimagesize($_FILES['image']['tmp_name']);
   $xPos = 0;
   $yPos = 0;
-  if ($width > $height) {
-    $xPos = ($width - $height) / 2;
-    $width = $height;
-  } else if ($height > $width) {
-    $yPos = ($height - $width) / 2;
-    $height = $width;
-  }
-  $dst = imagecreatetruecolor(250, 250);
-  imagecopyresampled($dst, $src, 0, 0, $xPos, $yPos, 250, 250, $width, $height);
+  if ($width > $height) $xPos = ($width - $height) / 2;
+  else $yPos = ($height - $width) / 2;
+
+  $dst = imagecreatetruecolor(204, 204);
+  imagecopyresampled($dst, $src, 0, 0, $xPos, $yPos, 204, 204, min($width, $height), min($width, $height));
 
   $filename = ($MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id']).".jpg";
   $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
   $existenceCheck = $db->query("SELECT url FROM assets WHERE page_id=$page_id AND type=1")->fetch();
   if ($existenceCheck) {
     $filename = $existenceCheck['url'];
-    imagejpeg($dst, "../assets/profile/".$filename, 100);
+    imagejpeg($dst, "../assets/profile/".$filename, 90);
   } else {
-    imagejpeg($dst, "../assets/profile/".$filename, 100);
+    imagejpeg($dst, "../assets/profile/".$filename, 90);
     $db->query("INSERT INTO assets VALUES (null, $page_id, '', '$filename', 1, NOW())");
   }
   echo json_encode(array("status"=>"ok", "message"=>getConfirmation()));
 }
 
 else if ($MYACCOUNT && $func == 'uploadPic') {
+  $src = null;
   $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
   $photoCount = $db->query("SELECT COUNT(id) FROM assets WHERE page_id=$page_id AND type=2")->fetch();
-  if ($photoCount[0] >= 20) {
-    echo json_encode(array("status"=>"failed", "message"=>"Only 20 pictures allowed"));
+  if ($photoCount[0] >= 21) {
+    echo json_encode(array("status"=>"failed", "message"=>"Only 21 pictures allowed"));
     return;
-  }
-
-  $src = null;
-  if ($_FILES["image"]["type"] == "image/png") $src = imagecreatefrompng($_FILES["image"]["tmp_name"]);
+  } else if ($_FILES["image"]["type"] == "image/png") $src = imagecreatefrompng($_FILES["image"]["tmp_name"]);
   else if ($_FILES["image"]["type"] == "image/jpeg") $src = imagecreatefromjpeg($_FILES["image"]["tmp_name"]);
   else {
     echo json_encode(array("status"=>"failed", "message"=>".JPG and .PNG only please"));
     return;
   }
+
   list($width, $height) = getimagesize($_FILES['image']['tmp_name']);
   $xPos = 0;
   $yPos = 0;
+  $wAspect = 1.0;
+  $hAspect = 1.0;
   if ($width > $height) {
+    $hAspect = $height / $width;
     $xPos = ($width - $height) / 2;
-    $width = $height;
-  } else if ($height > $width) {
+  } else {
+    $wAspect = $width / $height;
     $yPos = ($height - $width) / 2;
-    $height = $width;
   }
-  $dst = imagecreatetruecolor(250, 250);
-  imagecopyresampled($dst, $src, 0, 0, $xPos, $yPos, 250, 250, $width, $height);
+
+  $dst = imagecreatetruecolor(149, 149);
+  imagecopyresampled($dst, $src, 0, 0, $xPos, $yPos, 149, 149, min($width, $height), min($width, $height));
+  $dst_large = imagecreatetruecolor(550*$wAspect, 550*$hAspect);
+  imagecopyresampled($dst_large, $src, 0, 0, 0, 0, 550*$wAspect, 550*$hAspect, $width, $height);
 
   $filename = time().rand(1000,9999).".jpg";
-  imagejpeg($dst, "../assets/photos/".$filename, 100);
+  imagejpeg($dst, "../assets/photos/".$filename, 90);
+  imagejpeg($dst_large, "../assets/photos_large/".$filename, 90);
   $db->query("INSERT INTO assets VALUES (null, $page_id, '', '$filename', 2, NOW())");
   echo json_encode(array("status"=>"ok", "message"=>getConfirmation()));
 }

@@ -7,13 +7,10 @@ $bio = $MYACCOUNT['mode'] ? $MYACCOUNT['d_bio'] : $MYACCOUNT['a_bio'];
 $asset_profile = "/resources/images/placeholder.png";
 $asset_videos = array();
 $asset_photos = array();
-$assets = $db->query("SELECT url, title, type FROM assets WHERE page_id='$page_id' ORDER BY added ASC");
+$assets = $db->query("SELECT url, title, type FROM assets WHERE page_id='$page_id' ORDER BY added DESC");
 foreach ($assets->fetchAll() as $asset) {
   if ($asset['type'] == 1) $asset_profile = "/resources/assets/profile/".$asset['url'];
-  else if ($asset['type'] == 2) {
-    $asset['url'] = "/resources/assets/photos/".$asset['url'];
-    array_push($asset_photos, $asset);
-  }
+  else if ($asset['type'] == 2) array_push($asset_photos, $asset);
   else if ($asset['type'] == 3 || $asset['type'] == 4) array_push($asset_videos, $asset);
 }
 ?>
@@ -35,6 +32,10 @@ foreach ($assets->fetchAll() as $asset) {
     <label>
       <p>Date of Birth</p>
       <input type='text' name='birthdate' spellcheck='false' autocomplete='off' maxlength='19' placeholder='mm/dd/YYYY' value="<?php $birthdate = new DateTime($MYACCOUNT['birthdate']); echo $birthdate->format('m/d/Y'); ?>" onkeyup="checkDate(event, this)">
+    </label>
+    <label>
+      <p>Bio</p>
+      <textarea id="input_bio" rows='3' spellcheck='false' autocomplete='off' maxlength='1000' name="bio" placeholder="Profile pictures speak 1,000 words but your's speaks 'cutey pie' so why not fill in the rest."><?php echo $bio ?></textarea>
     </label>
     <input type='submit' value='Update Information'>
   </form>
@@ -159,15 +160,7 @@ foreach ($assets->fetchAll() as $asset) {
     <input type='submit' value='Create Casting Call'><input type='button' value='Upload Script'>
   </form>
 </div>
-<div id="popup_bio" class='card popup'>
-  <form class='popup_form' onsubmit='updateBio(this); return false'>
-    <input type="hidden" name="func" value="updateBio">
-    <h1>Your Bio</h1>
-    <textarea id="input_bio" rows='5' spellcheck='false' autocomplete='off' maxlength='1000' name="bio" placeholder="Profile pictures speak 1,000 words but your's speaks 'cutey pie' so why not fill in the rest."><?php echo $bio ?></textarea>
-    <input type='submit' value='Update Bio'>
-  </form>
-</div>
-<div id="popup_videos" class='card popup'>
+<div id="popup_video" class='card popup'>
   <form class='popup_form' onsubmit='addVideo(this); return false'>
     <input type="hidden" name="func" value="addVideo">
     <h1>Add a Video</h1>
@@ -188,11 +181,12 @@ foreach ($assets->fetchAll() as $asset) {
     <input type='submit' value='Add Video'>
   </form>
 </div>
+<div id="popup_photo" class='card popup popup_photo'></div>
 
 <!-- PROFILE HEADER -->
 
 <div id='profile'>
-  <input type='file' id="profile_pic_file" onchange="profilePic(this)" style="display:none" accept="image/x-png,image/jpeg">
+  <input type='file' id="profile_pic_file" onchange="uploadProfilePic(this)" style="display:none" accept="image/x-png,image/jpeg">
   <div class='c_pic' onclick="document.getElementById('profile_pic_file').click()" style="background-image: url('<?php echo $asset_profile; ?>')"></div>
   <div class='card'>
     <h1 id="name"><?php echo $MYACCOUNT['firstname']." ".$MYACCOUNT['lastname'] ?></h1>
@@ -213,11 +207,13 @@ foreach ($assets->fetchAll() as $asset) {
 </div>
 <div class='card_column_left'>
   <div class='card'>
-    <input type='button' class='card_edit' value="edit" onclick="togglePopup(document.getElementById('popup_bio'))">
+    <input type='button' class='card_edit' value="edit" onclick="togglePopup(document.getElementById('popup_basic'))">
     <h1>Bio</h1>
-    <p>
-      <?php echo $bio != "" ? $bio : "You have no bio. <a onclick=\"togglePopup(document.getElementById('popup_bio'))\">Add a Bio?</a>" ?>
-    </p>
+    <p><?php echo $bio != "" ? $bio : "You have no bio. <a onclick=\"togglePopup(document.getElementById('popup_basic'))\">Add a Bio?</a>" ?></p>
+  </div>
+  <div class='card'>
+    <h1>Recommendations</h1>
+    <p>You have no recommendations.</p>
   </div>
   <div class='card'>
     <h1>Followers</h1>
@@ -226,51 +222,53 @@ foreach ($assets->fetchAll() as $asset) {
 </div>
 <div class='card_column_right'>
   <div class='card'>
-    <input type='file' id="upload_pic" onchange="uploadPic(this)" style="display:none" accept="image/x-png,image/jpeg">
-    <input type='button' style='font-size: 19px' class='card_edit' value="+" onclick="document.getElementById('upload_pic').click()">
-    <h1>Photos</h1>
-    <?php
-    if (empty($asset_photos)) echo "<p>You have no photos. <a onclick=\"document.getElementById('upload_pic').click()\">Add a Photo?</a></p>";
-    foreach ($asset_photos as $asset) {
-      echo "<div class='c_photo_container'><div class='c_photo' style=\"background-image: url('".$asset['url']."')\"></div></div>";
-    }
-    ?>
-  </div>
-  <div class='card'>
     <input type='button' style='font-size: 19px' class='card_edit' value="+" onclick="togglePopup(document.getElementById('popup_videos'))">
     <h1>Videos</h1>
     <?php
-    if (empty($asset_videos)) echo "<p>You have no videos. <a onclick=\"togglePopup(document.getElementById('popup_videos'))\">Add a Video?</a></p>";
+    if (empty($asset_videos)) echo "<p>You have no videos. <a onclick=\"togglePopup(document.getElementById('popup_video'))\">Add a Video?</a></p>";
     foreach ($asset_videos as $asset) {
       if ($asset['type'] == 3) {
         echo "
         <label>
           <p>".$asset['title']."</p>
-          <iframe src='https://www.youtube.com/embed/".$asset['url']."' width='443' height='250' frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+          <iframe src='https://www.youtube.com/embed/".$asset['url']."' frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
         </label>";
       } else if ($asset['type'] == 4) {
         echo "
         <label>
           <p>".$asset['title']."</p>
-          <iframe src='https://player.vimeo.com/video/".$asset['url']."' width='443' height='250' frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+          <iframe src='https://player.vimeo.com/video/".$asset['url']."' frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
         </label>";
       }
     }
     ?>
   </div>
   <div class='card'>
-    <input type='button' class='card_edit' value="edit" onclick="togglePopup(document.getElementById('popup_recommendations'))">
-    <h1>Recommendations</h1>
-    <p>You have no recommendations. <a onclick="togglePopup(document.getElementById('popup_recommendations'))">Request a Recommendation?</a></p>
+    <input type='file' id="upload_pic" onchange="uploadPic(this)" style="display:none" accept="image/x-png,image/jpeg">
+    <input type='button' style='font-size: 19px' class='card_edit' value="+" onclick="document.getElementById('upload_pic').click()">
+    <h1>Photos</h1>
+    <?php
+    if (empty($asset_photos)) {
+      echo "<p>You have no photos. <a onclick=\"document.getElementById('upload_pic').click()\">Add a Photo?</a></p>";
+    } else {
+      echo "<div class='c_photos'>";
+      foreach ($asset_photos as $asset) {
+        $url = "/resources/assets/photos/".$asset['url'];
+        $url_large = "/resources/assets/photos_large/".$asset['url'];
+        echo "<div class='c_photo' style=\"background-image: url('".$url."')\" onclick=\"document.getElementById('popup_photo').style.backgroundImage='url(".$url_large.")'; togglePopup(document.getElementById('popup_photo'))\"></div>";
+      }
+      echo "</div>";
+    }
+    ?>
   </div>
 </div>
 
 <!-- SCRIPTS -->
 
 <script>
-  function profilePic(input) {
+  function uploadProfilePic(input) {
     if (input.files[0].size <= 500000) {
-      post("/resources/ajax/functions.php", {"func": "profilePic", "image": input.files[0]}, function(r) {
+      post("/resources/ajax/functions.php", {"func": "uploadProfilePic", "image": input.files[0]}, function(r) {
         r = JSON.parse(r)
         if (r['status'] == 'ok') window.location.href = "/"
         addAlert(r['message'])
@@ -287,19 +285,6 @@ foreach ($assets->fetchAll() as $asset) {
         addAlert(r['message'])
       })
     } else addAlert("That file is larger than 500kb")
-  }
-
-  function updateBio(form) {
-    form = parse(form)
-    post("/resources/ajax/functions.php", form, function(r) {
-      r = JSON.parse(r)
-      if (r["status"] == "ok") {
-        togglePopup()
-        setTimeout(function() {
-          window.location.href = "/"
-        },300)
-      } else addAlert(r['message'])
-    })
   }
 
   function updateInfo(form) {

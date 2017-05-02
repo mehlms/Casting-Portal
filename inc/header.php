@@ -104,7 +104,7 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
     currentPopup = null
     function togglePopup(popup) {
       if (currentPopup) {
-        currentPopup.style.top = "0px"
+        currentPopup.style.top = "42%"
         currentPopup.style.opacity = 0
         document.getElementById("darkness").style.opacity = 0
         setTimeout(function() {
@@ -118,7 +118,7 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
         document.getElementById("darkness").style.display = "block"
         setTimeout(function() {
           currentPopup.style.opacity = 1
-          currentPopup.style.top = "87px"
+          currentPopup.style.top = "48%"
           document.getElementById("darkness").style.opacity = 1
         }, 33)
       }

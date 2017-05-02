@@ -32,7 +32,7 @@
 }
 .alert {
   line-height: 1;
-  background-color: #98002e;
+  background-color: #FF0035;
   font-weight: 600;
   color: white;
   padding: 25px 30px;
@@ -280,7 +280,7 @@ a, input[type='submit'], input[type='button'] {
 }
 #profile .c_pic {
   display: inline-block;
-  background: #222 url('') no-repeat center center;
+  background: #151515 url('') no-repeat center center;
   background-size: cover;
   cursor: pointer;
   height: 204px;
@@ -319,8 +319,8 @@ a, input[type='submit'], input[type='button'] {
   padding: 28px 30px 25px;
   margin-bottom: 20px;
   display: inline-block;
-  position: relative;
   width: 100%;
+  position: relative;
 }
 .card > p:last-child, .popup_form > input {
   margin-bottom: 0;
@@ -342,42 +342,32 @@ a, input[type='submit'], input[type='button'] {
   right: -14px;
   top: -11px;
 }
-
-.card .c_photo_container {
-  height: 98px;
-  width: 98px;
-  display: inline-block;
-  vertical-align: top;
-  position: relative;
-  margin: 0 1px 2px;
-  cursor: text;
-}
 .card .c_photo {
-  position: absolute;
   background: #222 url('') no-repeat center center;
   background-size: cover;
-  height: 98px;
-  width: 98px;
-  top: 0;
-  left: 0;
-  border-radius: 4px;
-  transition: width 0.3s, height 0.3s, top 0.3s, left 0.3s;
-  pointer-events: none;
+  height: 148px;
+  width: 148px;
+  display: inline-block;
+  vertical-align: top;
+  margin: 0.5px;
+  /*border: 1px solid #ddd;*/
+  cursor: pointer;
 }
-
-.card .c_photo_container:hover .c_photo {
-  border-radius: 10px;
-  z-index: 100;
-  width: 250px;
-  height: 250px;
-  top: -80px;
-  left: -75px;
-  box-shadow: 0 10px 30px rgba(0,0,0, 0.8);
+.card .c_photos {
+  text-align:left;
+  width: 450px;
+  margin-top: 3px;
+  display: inline-block;
+}
+.card iframe {
+  width: 450px;
+  height: 263px;
 }
 
 .popup {
-  position: absolute;
-  top: 0px;
+  position: fixed;
+  top: 42%;
+  transform: translateY(-50%);
   opacity: 0;
   z-index: 10;
   width: 606px;
@@ -416,4 +406,15 @@ a, input[type='submit'], input[type='button'] {
 }
 .popup .row label {
   width: 253px;
+}
+.popup_photo {
+  border-radius: 0;
+  width: 550px;
+  margin-left: -275px;
+  height: 650px;
+  background: url('') no-repeat center center;
+  background-color: transparent;
+  box-shadow: none;
+  pointer-events: none;
+  background-size: contain;
 }
