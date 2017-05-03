@@ -1,7 +1,7 @@
 <?php include "db.php";
 if (!$MYACCOUNT && $_SERVER['REQUEST_URI'] != "/login/") header("Location: /login/"); // IF USER IS NOT LOGGED IN -> REDIRECT TO /LOGIN/
 else if ($MYACCOUNT && $MYACCOUNT['firstname'] == NULL && $_SERVER['REQUEST_URI'] != "/complete/") header("Location: /complete/");
-// else if ($MYACCOUNT && $MYACCOUNT['firstname'] && (strpos($_SERVER['REQUEST_URI'], 'complete') || strpos($_SERVER['REQUEST_URI'], 'login'))) header("Location: /");
+else if ($MYACCOUNT && $MYACCOUNT['firstname'] && (strpos($_SERVER['REQUEST_URI'], 'complete') || strpos($_SERVER['REQUEST_URI'], 'login'))) header("Location: /");
 $data = isset($_GET['data']) ? $_GET['data'] : null;
 ?>
 
@@ -103,9 +103,11 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
 
     currentPopup = null
     function togglePopup(popup) {
+      fixed = popup.getAttribute("data-fixed")
       if (currentPopup) {
-        currentPopup.style.top = "42%"
         currentPopup.style.opacity = 0
+        if (fixed) currentPopup.style.top = '0px'
+        else currentPopup.style.top = '43%'
         document.getElementById("darkness").style.opacity = 0
         setTimeout(function() {
           document.getElementById("darkness").style.display = "none"
@@ -114,11 +116,16 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
         }, 300)
       } else {
         currentPopup = popup
+        if (fixed) {
+          currentPopup.style.transform = 'none'
+          currentPopup.style.top = '0px'
+        }
         currentPopup.style.display = "block"
         document.getElementById("darkness").style.display = "block"
         setTimeout(function() {
           currentPopup.style.opacity = 1
-          currentPopup.style.top = "48%"
+          if (fixed) currentPopup.style.top = '67px'
+          else currentPopup.style.top = '48%'
           document.getElementById("darkness").style.opacity = 1
         }, 33)
       }
@@ -127,7 +134,7 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
 </head>
 <body>
   <div id="alerts"></div>
-  <div id="darkness" onclick="togglePopup(null)"></div>
+  <div id="darkness" onclick="togglePopup(currentPopup)"></div>
   <div id="header">
     <a href='/' class="c_logo"></a>
     <?php if ($MYACCOUNT && $MYACCOUNT['firstname'] != null) {

@@ -108,6 +108,79 @@ body {
   left: 0;
 }
 
+input, select, textarea {
+  padding: 9px 11px;
+  line-height: 17px;
+  background-color: white;
+  border-radius: 4px;
+  margin: 0 4px;
+  margin-bottom: 10px;
+  width: 299px;
+  border: 1px solid #ddd;
+}
+input[type='submit'], input[type='button'] {
+  float: right;
+  width: auto;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 9px 13px;
+  pointer-events: all;
+  box-shadow: 0 1px 2px rgba(0,0,0,.3);
+}
+textarea {
+  resize: none;
+}
+select {
+  background: white url('/resources/images/arrow_down.png') no-repeat center right 11px;
+  cursor: pointer;
+}
+
+.label {
+  display: inline-block;
+  text-align: left;
+}
+.label p {
+  font-weight: 600;
+  margin-bottom: 4px;
+  margin-left: 5px;
+}
+
+h1 {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 9px;
+}
+h2 {
+  color: #FF0035;
+  letter-spacing: 1.3px;
+  font-weight: 600;
+  text-align: left;
+}
+p {
+  margin-bottom: 8px;
+}
+a {
+  color: #98002e;
+  cursor: pointer;
+}
+b {
+  font-weight: 600;
+}
+
+/*SHARED STYLES*/
+input, select, textarea, #profile .c_pic, .card {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transition: box-shadow 0.3s;
+}
+input:focus, select:focus, textarea:focus, input[type='button']:hover, input[type='submit']:hover {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+a, input[type='submit'], input[type='button'] {
+  color: #FF0035;
+}
+
+/*HEADER STUFF*/
 #header {
   background-color: #fff;
   height: 67px;
@@ -166,7 +239,6 @@ body {
   -webkit-filter: invert(100%);
   filter: invert(100%);
 }
-
 #notifications {
   overflow: hidden;
   width: 0;
@@ -188,88 +260,7 @@ body {
   font-weight: 400;
 }
 
-input, select, textarea {
-  padding: 9px 11px;
-  line-height: 17px;
-  background-color: white;
-  border-radius: 4px;
-  margin: 0 4px;
-  margin-bottom: 10px;
-  width: 299px;
-  border: 1px solid #ddd;
-}
-input[type='submit'], input[type='button'] {
-  float: right;
-  width: auto;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  padding: 9px 13px;
-  pointer-events: all;
-}
-textarea {
-  resize: none;
-}
-select {
-  background: white url('/resources/images/arrow_down.png') no-repeat center right 11px;
-  cursor: pointer;
-}
-
-label {
-  display: inline-block;
-  text-align: left;
-}
-label p {
-  font-weight: 600;
-  margin-bottom: 4px;
-  margin-left: 5px;
-}
-.label_add {
-  display: inline-block;
-  position: absolute;
-  margin-top: 33px;
-  margin-left: 12px;
-  font-size: 19px;
-  cursor: pointer;
-}
-
-h1 {
-  font-size: 26px;
-  font-weight: 600;
-  margin-bottom: 9px;
-}
-h2 {
-  color: #FF0035;
-  letter-spacing: 1.3px;
-  font-weight: 600;
-  text-align: left;
-}
-p {
-  margin-bottom: 8px;
-}
-a {
-  color: #98002e;
-  cursor: pointer;
-}
-b {
-  font-weight: 600;
-}
-
-/*SHARED STYLES*/
-
-input, select, textarea, #profile .c_pic, .card {
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  transition: box-shadow 0.3s;
-}
-input:focus, select:focus, input[type='submit']:hover, input[type='button']:hover, textarea:focus {
-  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-}
-a, input[type='submit'], input[type='button'] {
-  color: #FF0035;
-}
-
 /*PAGE STUFF*/
-
 #profile {
   display: block;
   margin: 0 auto;
@@ -288,11 +279,12 @@ a, input[type='submit'], input[type='button'] {
   vertical-align: top;
   z-index: 2;
   position: relative;
-  border: 1px solid white;
+  border: 2px solid white;
   border-radius: 50%;
+  transition: background-color 0.2s;
 }
 #profile .c_pic:hover {
-  background-color: #333;
+  background-color: #222;
 }
 #profile h1 {
   margin-bottom: 8px;
@@ -312,11 +304,83 @@ a, input[type='submit'], input[type='button'] {
   pointer-events: none;
 }
 
+/*POPUP STUFF*/
+.popup {
+  position: fixed;
+  top: 43%;
+  transform: translateY(-50%);
+  opacity: 0;
+  z-index: 10;
+  width: 606px;
+  left: 50%;
+  margin-left: -303px;
+  transition: opacity .3s, top .3s;
+  display: none;
+}
+.popup form {
+  width: 516px;
+  margin: 0 auto;
+}
+.popup input[type='text'], .popup textarea, .popup select {
+  width: 98%;
+}
+.popup .label {
+  width: 100%;
+}
+.popup h1 {
+  margin-bottom: 14px;
+}
+.popup h2 {
+  margin-top: -4px;
+  margin-left: 5px;
+  margin-bottom: 8px;
+}
+.popup hr {
+  border-top: 1px solid #fac;
+  width: 396px;
+  margin-top: -19px;
+  margin-left: 112px;
+  position: absolute;
+}
+.popup .row {
+  text-align: left;
+}
+.popup .row .label {
+  width: 253px;
+}
+.popup .label {
+  position: relative;
+}
+.popup .label .c_add {
+  display: inline-block;
+  position: absolute;
+  right: -30px;
+  margin-top: 8px;
+  font-size: 19px;
+  cursor: pointer;
+}
+.popup_photo {
+  border-radius: 0;
+  width: 550px;
+  margin-left: -275px;
+  height: 650px;
+  background: url('') no-repeat center center;
+  background-color: transparent;
+  box-shadow: none;
+  pointer-events: none;
+  background-size: contain;
+}
+.popup .scroll {
+  max-height: 694px;
+  overflow: scroll;
+}
+
+/*CARD STUFF*/
 .card {
   background: white;
   border-radius: 10px;
   text-align: center;
-  padding: 28px 30px 25px;
+  padding: 28px 36px 25px;
   margin-bottom: 20px;
   display: inline-block;
   width: 100%;
@@ -333,88 +397,47 @@ a, input[type='submit'], input[type='button'] {
   width: 63%;
   float: right;
 }
-.card_ghost {
-  background: none !important;
-  box-shadow: none !important;
-}
-.card_edit {
+.card .c_edit {
   position: absolute;
-  right: -14px;
-  top: -11px;
+  right: -8px;
+  top: -8px;
+  z-index: 2;
+  margin: 0 !important;
+}
+.card .c_add {
+  font-size: 19px;
+  padding-right: 11px;
+  padding-bottom: 7px;
+  /*padding: 3px 9px 5px 10px !important;*/
+}
+.card .c_delete {
+  font-size: 22px;
+  padding: 3px 9px 5px 10px !important;
+}
+.card .c_delete_video {
+  top: 15px;
 }
 .card .c_photo {
-  background: #222 url('') no-repeat center center;
+  background: #151515 url('') no-repeat center center;
   background-size: cover;
-  height: 148px;
-  width: 148px;
+  height: 176px;
+  width: 176px;
   display: inline-block;
   vertical-align: top;
   margin: 0.5px;
-  /*border: 1px solid #ddd;*/
   cursor: pointer;
+  position: relative;
 }
-.card .c_photos {
-  text-align:left;
-  width: 450px;
-  margin-top: 3px;
-  display: inline-block;
+.card .c_assets {
+  text-align: left;
+  margin-top: 14px;
+}
+.card .c_assets .label {
+  margin: 2px;
+  width: 49%;
+  position: relative;
 }
 .card iframe {
-  width: 450px;
-  height: 263px;
-}
-
-.popup {
-  position: fixed;
-  top: 42%;
-  transform: translateY(-50%);
-  opacity: 0;
-  z-index: 10;
-  width: 606px;
-  left: 50%;
-  margin-left: -303px;
-  transition: opacity .3s, top .3s;
-  display: none;
-}
-.popup_form {
-  width: 516px;
-  margin: 0 auto;
-}
-.popup input[type='text'], .popup textarea, .popup select {
-  width: 98%;
-}
-.popup label {
   width: 100%;
-}
-.popup h1 {
-  margin-bottom: 14px;
-}
-.popup h2 {
-  margin-top: -4px;
-  margin-left: 5px;
-  margin-bottom: 8px;
-}
-.popup hr {
-  border-top: 1px solid #FF0035;
-  width: 390px;
-  margin-top: -19px;
-  margin-left: 112px;
-  position: absolute;
-}
-.popup .row {
-  text-align: left;
-}
-.popup .row label {
-  width: 253px;
-}
-.popup_photo {
-  border-radius: 0;
-  width: 550px;
-  margin-left: -275px;
-  height: 650px;
-  background: url('') no-repeat center center;
-  background-color: transparent;
-  box-shadow: none;
-  pointer-events: none;
-  background-size: contain;
+  height: 150px;
 }

@@ -59,8 +59,7 @@ else if ($MYACCOUNT && $func == "create") {
   $characters = getArray("characters");
 
   if ($title && $type && $description && count($auditions) > 0 && count($shootings) > 0 && count($characters) > 0) {
-    $d_id = intval($MYACCOUNT['d_id']);
-    $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $d_id, '$title', $type, '$description', NOW())");
+    $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $page_id, '$title', $type, '$description', NOW())");
     $call_id = $db->query("SELECT id FROM calls ORDER BY id DESC")->fetch()['id'];
     foreach ($auditions as $audition) {
       $audition_time = strToDate($audition["time"]);
@@ -116,8 +115,7 @@ else if ($MYACCOUNT && $func == 'uploadProfilePic') {
   $dst = imagecreatetruecolor(204, 204);
   imagecopyresampled($dst, $src, 0, 0, $xPos, $yPos, 204, 204, min($width, $height), min($width, $height));
 
-  $filename = ($MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id']).".jpg";
-  $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
+  $filename = $page_id.".jpg";
   $existenceCheck = $db->query("SELECT url FROM assets WHERE page_id=$page_id AND type=1")->fetch();
   if ($existenceCheck) {
     $filename = $existenceCheck['url'];
@@ -131,10 +129,9 @@ else if ($MYACCOUNT && $func == 'uploadProfilePic') {
 
 else if ($MYACCOUNT && $func == 'uploadPic') {
   $src = null;
-  $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
   $photoCount = $db->query("SELECT COUNT(id) FROM assets WHERE page_id=$page_id AND type=2")->fetch();
-  if ($photoCount[0] >= 21) {
-    echo json_encode(array("status"=>"failed", "message"=>"Only 21 pictures allowed"));
+  if ($photoCount[0] >= 15) {
+    echo json_encode(array("status"=>"failed", "message"=>"Only 15 pictures allowed"));
     return;
   } else if ($_FILES["image"]["type"] == "image/png") $src = imagecreatefrompng($_FILES["image"]["tmp_name"]);
   else if ($_FILES["image"]["type"] == "image/jpeg") $src = imagecreatefromjpeg($_FILES["image"]["tmp_name"]);
@@ -156,8 +153,8 @@ else if ($MYACCOUNT && $func == 'uploadPic') {
     $yPos = ($height - $width) / 2;
   }
 
-  $dst = imagecreatetruecolor(149, 149);
-  imagecopyresampled($dst, $src, 0, 0, $xPos, $yPos, 149, 149, min($width, $height), min($width, $height));
+  $dst = imagecreatetruecolor(176, 176);
+  imagecopyresampled($dst, $src, 0, 0, $xPos, $yPos, 176, 176, min($width, $height), min($width, $height));
   $dst_large = imagecreatetruecolor(550*$wAspect, 550*$hAspect);
   imagecopyresampled($dst_large, $src, 0, 0, 0, 0, 550*$wAspect, 550*$hAspect, $width, $height);
 
@@ -172,7 +169,6 @@ else if ($MYACCOUNT && $func == 'addVideo') {
   $title = get("title");
   $youtubeLink = get('youtubeLink');
   $vimeoLink = get('vimeoLink');
-  $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
   if ($title && ($youtubeLink || $vimeoLink)) {
     if ($youtubeLink) {
       preg_match('/v=([^&]*)/', $youtubeLink, $matches);
@@ -194,11 +190,13 @@ else if ($MYACCOUNT && $func == 'addVideo') {
   }
 }
 
-else if ($MYACCOUNT && $func == "updateBio") {
-  $bio = get("bio");
-  if ($MYACCOUNT['mode']) $db->query("UPDATE accounts SET d_bio='$bio' WHERE token='$token'");
-  else $db->query("UPDATE accounts SET a_bio='$bio' WHERE token='$token'");
-  echo json_encode(array("status"=>"ok", "message"=>"Updated Bio"));
+else if ($MYACCOUNT && $func == 'deleteAsset') {
+  $id = getInt('id');
+  if ($id) {
+    $db->query("DELETE FROM assets WHERE id=$id AND page_id=$page_id");
+    if ($db->query("SELECT ROW_COUNT()")->fetch()[0] == 1) echo json_encode(array("status"=>"ok"));
+    else echo json_encode(array("status"=>"failed", "message"=>"H4CKing is a lyfestyle"));
+  }
 }
 
 else echo json_encode(array("status"=>"failed", "message"=>"That function does not exist", "func"=>$func));

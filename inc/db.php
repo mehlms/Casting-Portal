@@ -10,9 +10,11 @@ $db = new PDO('mysql:host=localhost;dbname=casting;charset=utf8', "root", "", $d
 
 $MYACCOUNT = null;
 $token = isset($_COOKIE["token"]) ? $_COOKIE['token']: null;
+$page_id = "";
 if ($token) {
   $MYACCOUNT = $db->query("SELECT * FROM accounts WHERE token='$token'")->fetch();
-  if (!$MYACCOUNT) setcookie("token", "", time() - 10000);
+  if ($MYACCOUNT) $page_id = $MYACCOUNT['mode'] ? $MYACCOUNT['d_id'] : $MYACCOUNT['a_id'];
+  else setcookie("token", "", time() - 10000);
 }
 
 function post($url, $data) {
