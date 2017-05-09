@@ -361,10 +361,10 @@ foreach ($assets->fetchAll() as $asset) {
             <b><a onclick=\"getCall('".$call['id']."')\">".$call["title"]."</a></b>
           </div>";
         foreach ($characters as $c) {
-          echo "<div class='c_text'><b><a>".$c["name"]."</b></a> · ".($c["cnt"] ? $c["cnt"]:0)." actors interested</div>";
+          echo "<div class='c_text'><a><b>".$c["name"]."</b></a> · ".($c["cnt"] ? $c["cnt"]:0)." actors interested</div>";
           foreach ($interested as $i) {
             if ($i['char_id'] == $c['id']) {
-              echo "<div class='c_photo' style='background-image: url(/resources/assets/profile/".$i['url'].")'></div>";
+              echo "<div class='c_photo' onclick=\"window.location.href='/user/".$i['a_id']."/'\" style='background-image: url(/resources/assets/profile/".$i['url'].")'></div>";
             }
           }
         }
@@ -450,8 +450,7 @@ foreach ($assets->fetchAll() as $asset) {
         popup.querySelector("[data-title]").innerHTML = r['call']['title']
         popup.querySelector("[data-collaborators]").innerHTML = ""
         r['collaborators'].forEach(function(d) {
-          console.log(d)
-          // popup.querySelector("[data-collaborators]").innerHTML += "<div class='c_text'><a href='/user/"+d['d_id']+"/'>"+d['firstname']+" "+d['lastname']+"</a></div>"
+          popup.querySelector("[data-collaborators]").innerHTML += "<div class='c_text'><a href='/user/"+d['d_id']+"/'>"+d['firstname']+" "+d['lastname']+"</a></div>"
         })
         popup.querySelector("[data-level]").innerHTML = r['call']['class']
         popup.querySelector("[data-auditions]").innerHTML = ""
