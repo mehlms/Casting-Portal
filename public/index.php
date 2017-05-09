@@ -362,7 +362,6 @@ foreach ($assets->fetchAll() as $asset) {
           </div>";
         foreach ($characters as $c) {
           echo "<div class='c_text'><b><a>".$c["name"]."</b></a> · ".($c["cnt"] ? $c["cnt"]:0)." actors interested</div>";
-          print_r($interested);
           foreach ($interested as $i) {
             if ($i['char_id'] == $c['id']) {
               echo "<div class='c_photo' style='background-image: url(/resources/assets/profile/".$i['url'].")'></div>";
