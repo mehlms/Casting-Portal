@@ -67,7 +67,7 @@ foreach ($assets->fetchAll() as $asset) {
 <div class='card_column_left'>
   <div class='card'>
     <h1>Bio</h1>
-    <p><?php echo $MYACCOUNT['bio'] != "" ? $MYACCOUNT['bio'] : "This ".($ACCOUNT['mode'] ? "director" : "talent")." has no bio." ?></p>
+    <p><?php echo $ACCOUNT['bio'] != "" ? $ACCOUNT['bio'] : "This ".($ACCOUNT['mode'] ? "director" : "talent")." has no bio." ?></p>
   </div>
   <div class='card'>
     <?php
