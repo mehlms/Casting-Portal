@@ -1,9 +1,9 @@
 <?php include "../inc/header.php" ?>
 
-<div id="center">
+<div class="center">
   <div>
     <h1>Error</h1>
-    That page does not exist.
+    <p>That page does not exist.</p>
   </div>
 </div>
 

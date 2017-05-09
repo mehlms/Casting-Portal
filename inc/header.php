@@ -2,10 +2,10 @@
 if (!$MYACCOUNT && $_SERVER['REQUEST_URI'] != "/login/") header("Location: /login/"); // IF USER IS NOT LOGGED IN -> REDIRECT TO /LOGIN/
 else if ($MYACCOUNT && $MYACCOUNT['firstname'] == NULL && $_SERVER['REQUEST_URI'] != "/complete/") header("Location: /complete/");
 else if ($MYACCOUNT && $MYACCOUNT['firstname'] && (strpos($_SERVER['REQUEST_URI'], 'complete') || strpos($_SERVER['REQUEST_URI'], 'login'))) header("Location: /");
-$data = isset($_GET['data']) ? $_GET['data'] : null;
+$data = isset($_GET['data']) ? intval($_GET['data']) : null;
 ?>
 
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html lang="en">
 <head>
   <title>Casting Portal | Chapman University</title>
@@ -33,6 +33,33 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
         }
       }
       return data
+    }
+
+    function parseArray(parent) {
+      var data = []
+      var objects = document.getElementById(parent).querySelectorAll('[data-row]')
+      for (var i = 0; i < objects.length; i++) {
+        var inputs = objects[i].querySelectorAll('[data-input]')
+        var object = {}
+        for (var j = 0; j < inputs.length; j++) {
+          object[inputs[j].getAttribute('data-input')] = inputs[j].value
+        }
+        data.push(object)
+      }
+      return JSON.stringify(data)
+    }
+
+    function addElement(parent) {
+      var parent = document.getElementById(parent)
+      var e = parent.querySelector("[data-row]").cloneNode(true)
+      var inputs = e.querySelectorAll('[data-input]')
+      for (var i = 0; i < inputs.length; i++) inputs[i].value = ""
+      var add = e.querySelector('[data-add]')
+      add.innerHTML = "-"
+      add.onclick = function() {
+        parent.removeChild(e)
+      }
+      parent.appendChild(e)
     }
 
     function addAlert(message) {
@@ -103,31 +130,26 @@ $data = isset($_GET['data']) ? $_GET['data'] : null;
 
     currentPopup = null
     function togglePopup(popup) {
-      fixed = popup.getAttribute("data-fixed")
-      if (currentPopup) {
+      if (currentPopup == null) {
+        currentPopup = popup
+        currentPopup.style.top = '46%'
+        currentPopup.style.display = "block"
+        document.getElementById("darkness").style.display = "block"
+        currentPopup.style.height = 2*Math.round(currentPopup.clientHeight/2) + "px"
+        setTimeout(function() {
+          currentPopup.style.opacity = 1
+          currentPopup.style.top = '50%'
+          document.getElementById("darkness").style.opacity = 1
+        }, 33)
+      } else {
+        currentPopup.style.top = '40%'
         currentPopup.style.opacity = 0
-        if (fixed) currentPopup.style.top = '0px'
-        else currentPopup.style.top = '43%'
         document.getElementById("darkness").style.opacity = 0
         setTimeout(function() {
           document.getElementById("darkness").style.display = "none"
           currentPopup.style.display = "none"
           currentPopup = null
         }, 300)
-      } else {
-        currentPopup = popup
-        if (fixed) {
-          currentPopup.style.transform = 'none'
-          currentPopup.style.top = '0px'
-        }
-        currentPopup.style.display = "block"
-        document.getElementById("darkness").style.display = "block"
-        setTimeout(function() {
-          currentPopup.style.opacity = 1
-          if (fixed) currentPopup.style.top = '67px'
-          else currentPopup.style.top = '48%'
-          document.getElementById("darkness").style.opacity = 1
-        }, 33)
       }
     }
   </script>

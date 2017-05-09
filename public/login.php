@@ -6,7 +6,14 @@
     <p>Please login with your Chapman ID to access the COPA casting portal.</p>
     <form onsubmit='login(this); return false'>
       <input type='hidden' name='func' value='login'>
-      <input type='text' placeholder='Email' spellcheck='false' autocomplete='off' maxlength='40' name='email'><input type='password' placeholder='Password' spellcheck='false' maxlength='40' name='password'><br>
+      <div class='row'>
+        <div class='label'>
+          <input type='text' placeholder='Email' spellcheck='false' autocomplete='off' maxlength='40' name='email'>
+        </div>
+        <div class='label'>
+          <input type='password' placeholder='Password' spellcheck='false' maxlength='40' name='password'><br>
+        </div>
+      </div>
       <input type='submit' value='Login'>
     </form>
   </div>

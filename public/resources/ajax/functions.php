@@ -33,7 +33,7 @@ else if ($MYACCOUNT && $func == "complete") {
   $birthdate = getDateTime("birthdate");
 
   if ($role != -1 && $gender && $firstname && $lastname && $birthdate) {
-    $db->query("UPDATE accounts SET firstname='$firstname', lastname='$lastname', gender=$gender, mode='$role', birthdate='$birthdate' WHERE token='$token'");
+    $db->query("UPDATE accounts SET firstname='$firstname', lastname='$lastname', gender=$gender, mode=$role, birthdate='$birthdate' WHERE token='$token'");
     echo json_encode(array("status"=>"ok", "message"=>"Success"));
   } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
 }
@@ -50,50 +50,73 @@ else if ($MYACCOUNT && $func == "updateInfo") {
   } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
 }
 
-else if ($MYACCOUNT && $func == "create") {
+else if ($MYACCOUNT && $func == "getCall") {
+  $id = getInt("id");
+  $call = $db->query("SELECT calls.*, class FROM calls JOIN classes ON calls.type=classes.id WHERE calls.id=$id")->fetch();
+  if ($call) {
+    $collaborators = $db->query("SELECT accounts.d_id, firstname, lastname FROM collaborators JOIN accounts ON collaborators.d_id=accounts.d_id WHERE call_id=$id ORDER BY collaborators.added")->fetchAll();
+    $auditions = $db->query("SELECT *, DATE_FORMAT(audition_time, '%l:%i %p, %b %D') as audition_time FROM auditions WHERE call_id=$id")->fetchAll();
+    $shootings = $db->query("SELECT DATE_FORMAT(shooting_from, '%b %D') as shooting_from, DATE_FORMAT(shooting_to, '%b %D') as shooting_to FROM shootings WHERE call_id=$id")->fetchAll();
+    $characters = $db->query("SELECT id, name, min, max, gender, description, (SELECT COUNT(*) FROM interested WHERE char_id=characters.id AND a_id=$page_id) as interested, (SELECT COUNT(*) FROM characters as c2 WHERE ".$MYACCOUNT['mode']."=0 AND characters.id=c2.id AND ".$MYACCOUNT['age'].">=min AND ".$MYACCOUNT['age']."<=max AND (gender=3 OR gender=".$MYACCOUNT['gender'].")) as can_interested FROM characters WHERE call_id=$id ORDER BY id ASC")->fetchAll();
+    echo json_encode(array("status"=>"ok", "call"=>$call, "collaborators"=>$collaborators, "auditions"=>$auditions, "shootings"=>$shootings, "characters"=>$characters));
+  } else echo json_encode(array("status"=>"failed", "message"=>"That call does not exist"));
+}
+
+else if ($MYACCOUNT && $func == "postCall") {
   $title = getWords("title");
   $type = getInt("type");
-  $description = get("description");
+  $storyline = get("storyline");
   $auditions = getArray("auditions");
   $shootings = getArray("shootings");
   $characters = getArray("characters");
 
-  if ($title && $type && $description && count($auditions) > 0 && count($shootings) > 0 && count($characters) > 0) {
-    $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), $page_id, '$title', $type, '$description', NOW())");
+  $db->beginTransaction();
+  try {
+    if (!$title || !$type || !$storyline || !count($auditions) || !count($shootings) && !count($characters)) throw new Exception();
+    $db->query("INSERT INTO calls VALUES ((SELECT UUID_short()), '$title', $type, '$storyline', NOW())");
     $call_id = $db->query("SELECT id FROM calls ORDER BY id DESC")->fetch()['id'];
-    foreach ($auditions as $audition) {
-      $audition_time = strToDate($audition["time"]);
-      $audition_place = $audition["place"];
-      $db->query("INSERT INTO auditions VALUES (null, $call_id, $audition_time, $audition_place)");
+    $db->query("INSERT INTO collaborators VALUES (null, $call_id, ".$MYACCOUNT['d_id'].", NOW())");
+
+    foreach ($auditions as $d) {
+      $time = strToDate($d["time"]);
+      $place = addslashes($d["place"]);
+      if (!$time || !$place) throw new Exception();
+      $db->query("INSERT INTO auditions VALUES (null, $call_id, '$time', '$place')");
     }
-    foreach ($shootings as $shooting) {
-      $shooting_from = strToDate($shooting["from"]);
-      $shooting_to = strToDate($shooting["to"]);
-      $db->query("INSERT INTO shootings VALUES (null, $call_id, $shooting_from, $shooting_to)");
+    foreach ($shootings as $d) {
+      $from = strToDate($d["from"]);
+      $to = strToDate($d["to"]);
+      if (!$from || !$to) throw new Exception();
+      $db->query("INSERT INTO shootings VALUES (null, $call_id, '$from', '$to')");
     }
-    foreach ($characters as $char) {
-      $char_name = $char["char_name"];
-      $char_min = $char["char_min"];
-      $char_max = $char["char_max"];
-      $char_gender = $char["char_gender"];
-      $char_description = $char["char_description"];
-      $db->query("INSERT INTO characters VALUES (null, $call_id, '$char_name', '$char_description', $char_min, $char_max, $char_gender)");
+    foreach ($characters as $d) {
+      $name = addslashes($d["name"]);
+      $min = intval($d["min"]);
+      $max = intval($d["max"]);
+      $gender = intval($d["gender"]);
+      $description = addslashes($d["description"]);
+      if (!$name || !$min || !$max || !$gender || !$description) throw new Exception();
+      $db->query("INSERT INTO characters VALUES (null, $call_id, '$name', $min, $max, $gender, '$description')");
     }
-    echo json_encode(array("status"=>"ok", "url"=>"/call/".$call_id."/"));
-  } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
+    echo json_encode(array("status"=>"ok"));
+    $db->commit();
+  } catch (Exception $e) {
+    echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
+  }
 }
 
 else if ($MYACCOUNT && $func == 'interested') {
-  $a_id = $MYACCOUNT['a_id'];
-  $call_id = getInt("call_id");
   $char_id = getInt("char_id");
-  $existanceCheck = $db->query("SELECT id FROM interested WHERE a_id=$a_id AND call_id=$call_id AND char_id=$char_id")->fetch();
-  if ($existanceCheck) {
-    $db->query("DELETE FROM interested WHERE a_id=$a_id AND call_id=$call_id AND char_id=$char_id");
-    echo json_encode(array("status"=>"ok", "message"=>"You have revoked your interest", "interested"=>0));
+
+  $check = $db->query("SELECT COUNT(*) as interested, (SELECT COUNT(*) FROM assets WHERE page_id=".$MYACCOUNT['a_id']." AND type=1) as profile_pic, (SELECT COUNT(*) FROM characters WHERE characters.id=$char_id AND ".$MYACCOUNT['age'].">=min AND ".$MYACCOUNT['age']."<=max AND (gender=3 OR gender=".$MYACCOUNT['gender'].")) as can_interested FROM interested WHERE a_id=".$MYACCOUNT['a_id']." AND char_id=$char_id")->fetch();
+  if ($check['interested']) {
+    $db->query("DELETE FROM interested WHERE a_id=".$MYACCOUNT['a_id']." AND char_id=$char_id");
+    echo json_encode(array("status"=>"ok", "message"=>"Revoked interest", "interested"=>0));
+  } else if ($check['can_interested'] && $check['profile_pic']) {
+    $db->query("INSERT INTO interested VALUES (null, ".$MYACCOUNT['a_id'].", $char_id, NOW())");
+    echo json_encode(array("status"=>"ok", "message"=>"Submitted interest", "interested"=>1));
   } else {
-    $db->query("INSERT INTO notifications VALUES (null, $a_id, $call_id, $char_id, NOW())");
-    echo json_encode(array("status"=>"ok", "message"=>"The casting team has been notified", "interested"=>1));
+    echo json_encode(array("status"=>"failed", "message"=>"You must first upload a profile picture"));
   }
 }
 
@@ -129,8 +152,8 @@ else if ($MYACCOUNT && $func == 'uploadProfilePic') {
 
 else if ($MYACCOUNT && $func == 'uploadPic') {
   $src = null;
-  $photoCount = $db->query("SELECT COUNT(id) FROM assets WHERE page_id=$page_id AND type=2")->fetch();
-  if ($photoCount[0] >= 15) {
+  $photoCount = $db->query("SELECT COUNT(*) FROM assets WHERE page_id=$page_id AND type=2")->fetch()["COUNT(*)"];
+  if ($photoCount >= 15) {
     echo json_encode(array("status"=>"failed", "message"=>"Only 15 pictures allowed"));
     return;
   } else if ($_FILES["image"]["type"] == "image/png") $src = imagecreatefrompng($_FILES["image"]["tmp_name"]);
@@ -194,8 +217,39 @@ else if ($MYACCOUNT && $func == 'deleteAsset') {
   $id = getInt('id');
   if ($id) {
     $db->query("DELETE FROM assets WHERE id=$id AND page_id=$page_id");
-    if ($db->query("SELECT ROW_COUNT()")->fetch()[0] == 1) echo json_encode(array("status"=>"ok"));
-    else echo json_encode(array("status"=>"failed", "message"=>"H4CKing is a lyfestyle"));
+    echo json_encode(array("status"=>"ok"));
+  }
+}
+
+else if ($MYACCOUNT && $func == "praise") {
+  $praise_to = getInt("praise_to");
+  $heart = getInt("heart");
+  $comment = get("comment");
+
+  if ($praise_to && $heart || $comment) {
+    if ($heart) {
+      $id = $db->query("SELECT id FROM praise WHERE praise_from=$page_id AND praise_to=$praise_to AND heart=1")->fetch()['id'];
+      if ($id) $db->query("DELETE FROM praise WHERE id=$id");
+      else $db->query("INSERT INTO praise VALUES (null, $page_id, $praise_to, 1, null, NOW())");
+      echo json_encode(array("status"=>"ok", "heart"=>1));
+      return;
+    } else $db->query("INSERT INTO praise VALUES (null, $page_id, $praise_to, 0, '$comment', NOW())");
+    echo json_encode(array("status"=>"ok"));
+  } else {
+    echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
+  }
+}
+
+else if ($MYACCOUNT && $func == "follow") {
+  $follow_to = getInt("follow_to");
+
+  if ($follow_to) {
+    $id = $db->query("SELECT id FROM follow WHERE follow_from=$page_id AND follow_to=$follow_to")->fetch()['id'];
+    if ($id) $db->query("DELETE FROM follow WHERE id=$id");
+    else $db->query("INSERT INTO follow VALUES (null, $page_id, $follow_to, NOW())");
+    echo json_encode(array("status"=>"ok"));
+  } else {
+    echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
   }
 }
 
