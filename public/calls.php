@@ -113,7 +113,7 @@ function getCall(id) {
       popup.querySelector("[data-title]").innerHTML = r['call']['title']
       popup.querySelector("[data-collaborators]").innerHTML = ""
       r['collaborators'].forEach(function(d) {
-        popup.querySelector("[data-collaborators]").innerHTML += "<div class='c_text'><a>"+d['firstname']+" "+d['lastname']+"</a></div>"
+        popup.querySelector("[data-collaborators]").innerHTML += "<div class='c_text'><a href='/user/"+d['d_id']+"/'>"+d['firstname']+" "+d['lastname']+"</a></div>"
       })
       popup.querySelector("[data-level]").innerHTML = r['call']['class']
       popup.querySelector("[data-auditions]").innerHTML = ""
