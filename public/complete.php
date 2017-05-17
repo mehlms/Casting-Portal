@@ -4,7 +4,7 @@
   <div>
     <h1>Almost There</h1>
     <p>Complete your basic information to enter.</p>
-    <form onsubmit='complete(this); return false'>
+    <form onsubmit='complete(this); return false' style='width: 330px'>
       <input type='hidden' name='func' value='complete'>
       <div class='label'>
         <p>Role</p>
@@ -32,7 +32,7 @@
       </div><br>
       <div class='label'>
         <p>Date of Birth</p>
-        <input type='text' name='birthdate' spellcheck='false' autocomplete='off' maxlength='10' placeholder='mm/dd/YYYY' onkeyup="checkDate(event, this)">
+        <input type='text' name='birthdate' spellcheck='false' autocomplete='off' maxlength='10' placeholder='7/9/1994'>
       </div><br>
       <input type='submit' value='Complete My Profile'>
     </form>
@@ -42,14 +42,9 @@
 <script>
   function complete(form) {
     post("/resources/ajax/functions.php", parse(form), function(r) {
-      try {
-        r = JSON.parse(r)
-      } catch (e) {
-        console.log(r)
-        return
-      }
+      r = JSON.parse(r)
       if (r["status"] == "ok") window.location = "/"
-      addAlert(r["message"])
+      else addAlert(r["message"])
     })
   }
 </script>

@@ -14,26 +14,33 @@ $db->query("DROP TABLE IF EXISTS collaborators");
 $db->query("DROP TABLE IF EXISTS classes");
 $db->query("DROP TABLE IF EXISTS praise");
 $db->query("DROP TABLE IF EXISTS follow");
+$db->query("DROP TABLE IF EXISTS genres");
+$db->query("DROP TABLE IF EXISTS classesFilter");
+$db->query("DROP TABLE IF EXISTS genresFilter");
 
-$db->query("CREATE TABLE api (id INT PRIMARY KEY AUTO_INCREMENT, email VARCHAR(40), password VARCHAR(40))");
-$db->query("CREATE TABLE accounts (id INT PRIMARY KEY AUTO_INCREMENT, a_id BIGINT, d_id BIGINT, a_bio VARCHAR(1000), d_bio VARCHAR(1000), mode BOOLEAN, token VARCHAR(40), email VARCHAR(80), firstname VARCHAR(50), lastname VARCHAR(50), gender INT, birthdate DATETIME, a_notifications INT, d_notifications INT, added DATETIME, last_access DATETIME)");
-$db->query("CREATE TABLE calls (id BIGINT PRIMARY KEY, title VARCHAR(200), type INT, storyline TEXT, added DATETIME)");
-$db->query("CREATE TABLE auditions (id INT PRIMARY KEY AUTO_INCREMENT, call_id BIGINT, audition_time DATETIME, audition_place VARCHAR(40))");
-$db->query("CREATE TABLE shootings (id INT PRIMARY KEY AUTO_INCREMENT, call_id BIGINT, shooting_from DATETIME, shooting_to DATETIME)");
-$db->query("CREATE TABLE characters (id INT PRIMARY KEY AUTO_INCREMENT, call_id BIGINT, name VARCHAR(50), min INT, max INT, gender INT, description TEXT)");
-$db->query("CREATE TABLE assets (id INT PRIMARY KEY AUTO_INCREMENT, page_id BIGINT, title VARCHAR(100), url VARCHAR(100), type INT, added DATETIME)");
-$db->query("CREATE TABLE interested (id INT PRIMARY KEY AUTO_INCREMENT, a_id BIGINT, char_id INT, added DATETIME)");
-$db->query("CREATE TABLE collaborators (id INT PRIMARY KEY AUTO_INCREMENT, call_id BIGINT, d_id BIGINT, added DATETIME)");
+$db->query("CREATE TABLE api (id INT PRIMARY KEY AUTO_INCREMENT, email VARCHAR(50), password VARCHAR(40))");
+$db->query("CREATE TABLE accounts (id INT PRIMARY KEY AUTO_INCREMENT, a_id INT, d_id INT, a_bio TEXT, d_bio TEXT, mode BOOLEAN, token VARCHAR(40), email VARCHAR(50), firstname VARCHAR(30), lastname VARCHAR(30), gender INT, birthdate DATETIME, looks_min INT, looks_max INT, added DATETIME, last_access DATETIME)");
+$db->query("CREATE TABLE calls (id INT PRIMARY KEY, title VARCHAR(200), type INT, genre INT, genre2 INT, storyline TEXT, added DATETIME)");
+$db->query("CREATE TABLE auditions (id INT PRIMARY KEY AUTO_INCREMENT, call_id INT, audition_time DATETIME, audition_place VARCHAR(50))");
+$db->query("CREATE TABLE shootings (id INT PRIMARY KEY AUTO_INCREMENT, call_id INT, shooting_from DATETIME, shooting_to DATETIME)");
+$db->query("CREATE TABLE characters (id INT PRIMARY KEY AUTO_INCREMENT, call_id INT, name VARCHAR(30), min INT, max INT, gender INT, description TEXT)");
+$db->query("CREATE TABLE assets (id INT PRIMARY KEY AUTO_INCREMENT, page_id INT, title VARCHAR(100), url VARCHAR(100), type INT, added DATETIME)");
+$db->query("CREATE TABLE interested (id INT PRIMARY KEY AUTO_INCREMENT, a_id INT, char_id INT, added DATETIME)");
+$db->query("CREATE TABLE collaborators (id INT PRIMARY KEY AUTO_INCREMENT, call_id INT, d_id INT, added DATETIME)");
+$db->query("CREATE TABLE praise (id INT PRIMARY KEY AUTO_INCREMENT, praise_from INT, praise_to INT, heart BOOLEAN, comment VARCHAR(140), added DATETIME)");
+$db->query("CREATE TABLE follow (id INT PRIMARY KEY AUTO_INCREMENT, follow_from INT, follow_to INT, added DATETIME)");
 $db->query("CREATE TABLE classes (id INT PRIMARY KEY AUTO_INCREMENT, class VARCHAR(100))");
-$db->query("CREATE TABLE praise (id INT PRIMARY KEY AUTO_INCREMENT, praise_from BIGINT, praise_to BIGINT, heart BOOLEAN, comment VARCHAR(140), added DATETIME)");
-$db->query("CREATE TABLE follow (id INT PRIMARY KEY AUTO_INCREMENT, follow_from BIGINT, follow_to BIGINT, added DATETIME)");
+$db->query("CREATE TABLE classesFilter (id INT PRIMARY KEY AUTO_INCREMENT, a_id INT, class_id INT)");
+$db->query("CREATE TABLE genres (id INT PRIMARY KEY AUTO_INCREMENT, genre VARCHAR(30))");
+$db->query("CREATE TABLE genresFilter (id INT PRIMARY KEY AUTO_INCREMENT, a_id INT, genre_id INT)");
 
 $db->query("INSERT INTO api VALUES".
 "(null, 'helms107@mail.chapman.edu', '1234'),".
 "(null, 'guest@mail.chapman.edu', '1234'),".
 "(null, 'guest2@mail.chapman.edu', '1234'),".
 "(null, 'guest3@mail.chapman.edu', '1234'),".
-"(null, 'guest4@mail.chapman.edu', '1234')");
+"(null, 'guest4@mail.chapman.edu', '1234'),".
+"(null, 'guest5@mail.chapman.edu', '1234')");
 
 $db->query("INSERT INTO classes VALUES".
 "(null, 'Undergraduate Visual Storytelling (FTV 130)'),".
@@ -59,6 +66,26 @@ $db->query("INSERT INTO classes VALUES".
 "(null, 'Graduate Filmmakers and Actors Workshop (FP 507)'),".
 "(null, 'Graduate Independent Study'),".
 "(null, 'Other')");
+
+$db->query("INSERT INTO genres VALUES".
+"(null, 'Action'),".
+"(null, 'Adult'),".
+"(null, 'Adventure'),".
+"(null, 'Animation'),".
+"(null, 'Comedy'),".
+"(null, 'Documentary'),".
+"(null, 'Drama'),".
+"(null, 'Family'),".
+"(null, 'Fantasy'),".
+"(null, 'Historical'),".
+"(null, 'Horror'),".
+"(null, 'Musical'),".
+"(null, 'Romance'),".
+"(null, 'Sci-Fi'),".
+"(null, 'Sports'),".
+"(null, 'Thriller'),".
+"(null, 'War'),".
+"(null, 'Western')");
 $db->commit();
 
 ?>

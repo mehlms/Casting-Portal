@@ -3,7 +3,7 @@
 <div class="center">
   <div>
     <h1>Authenticate</h1>
-    <p>Please login with your Chapman ID to access the COPA casting portal.</p>
+    <p>Please sign in with your Chapman ID to access the COPA casting portal.</p>
     <form onsubmit='login(this); return false'>
       <input type='hidden' name='func' value='login'>
       <div class='row'>
