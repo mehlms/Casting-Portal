@@ -62,16 +62,21 @@ function getDirectorCard() {
     foreach ($calls as $call) {
       $characters = $db->query("SELECT * FROM characters LEFT JOIN (SELECT char_id, COUNT(*) as cnt FROM interested GROUP BY char_id) t2 ON char_id=id WHERE call_id=".$call['id']." ORDER BY cnt DESC")->fetchAll();
       $interested = $db->query("SELECT char_id, a_id, url, type FROM interested JOIN characters ON interested.char_id=characters.id JOIN assets ON interested.a_id=assets.page_id WHERE assets.type=1")->fetchAll();
+      $collaborators = $db->query("SELECT accounts.d_id, collaborators.id, firstname, lastname FROM collaborators JOIN accounts ON collaborators.d_id=accounts.d_id WHERE call_id=".$call['id'])->fetchAll();
       $auditions = $db->query("SELECT * FROM auditions WHERE call_id=".$call['id'])->fetchAll();
+      $shootings = $db->query("SELECT * FROM shootings WHERE call_id=".$call['id'])->fetchAll();
       echo "
       <div class='c_item' style='position: relative'>
-        <input type='button' class='c_edit' value='Email' onclick=\"document.getElementById('email_call_id').value='".$call['id']."';togglePopup(document.getElementById('popup_email'))\">
-        <input type='button' class='c_edit' value='Edit' onclick=\"getEditCall(".$call['id'].")\" style='right: 61px'>
-          <b><a onclick=\"getCall('".$call['id']."')\">".$call["title"]."</a></b><br>";
-      foreach ($auditions as $d) echo "<a href='https://www.google.com/calendar/render?action=TEMPLATE&text=".$call['title']." Audition&dates=20140127T224000Z/20140320T221500Z&details=Audition Time&location=".$d['audition_place']."&sf=true&output=xml' target='_blank' rel='nofollow'>".format($d['audition_time'], "g:ia D, M jS")."</a><br>";
+        <div class='c_text'>
+          Call for <b><a onclick=\"getCall('".$call['id']."')\">".$call["title"]."</a></b>
+        </div>
+        <input type='button' value='Email' onclick=\"document.getElementById('email_call_id').value='".$call['id']."'; togglePopup(document.getElementById('popup_email'))\" style='float:none'><input type='button' value='Add' onclick=\"document.getElementById('add_call_id').value='".$call['id']."'; togglePopup(document.getElementById('popup_add'))\" style='float:none'><input type='button' value='Edit' onclick=\"getEditCall(".$call['id'].")\" style='float:none'><input type='button' value='Close' onclick=\"closeCall(".$call['id'].")\" style='float:none'><br>";
+      foreach ($collaborators as $d) echo "<a href='/user/".$d['d_id']."'>".$d['firstname']." ".$d['lastname']."</a> · <a onclick='removeRow(4, ".$d['id'].")'>Remove</a><br>";
+      foreach ($auditions as $d) echo "Auditioning ".format($d['audition_time'], "M jS g:ia")." · ".$d['audition_place']." · <a onclick='removeRow(1, ".$d['id'].")'>Remove</a><br>";
+      foreach ($shootings as $d) echo "Shooting ".format($d['shooting_from'], "M jS")." - ".format($d['shooting_to'], "M jS")." · <a onclick='removeRow(2, ".$d['id'].")'>Remove</a><br>";
       foreach ($characters as $c) {
         echo "<div class='c_text' style='text-align:center'>
-        <a><b>".$c["name"]."</b></a> · ".($c["cnt"] ? $c["cnt"]:"No one")." interested<br>";
+        <b>".$c["name"]."</b> · ".($c["cnt"] ? $c["cnt"]:"No ones")." interested · <a onclick='removeRow(3, ".$c['id'].")'>Remove</a><br>";
         foreach ($interested as $i) {
           if ($i['char_id'] == $c['id']) {
             echo "<div class='c_photo' onclick=\"window.location.href='/user/".$i['a_id']."/'\" style='background-image: url(/resources/assets/profile/".$i['url'].")'></div>";
@@ -206,7 +211,7 @@ function getFollowerCard() {
         </div>
         <div class='row' data-row>
           <div class="label">
-            <input type='text' data-input='time' spellcheck='false' autocomplete='off' maxlength='19' placeholder='9/23 5:30pm'>
+            <input type='text' data-input='time' spellcheck='false' autocomplete='off' maxlength='19' placeholder='9/20 12:00pm'>
           </div>
           <div class="label">
             <div class='c_add' data-add onclick="addElement('auditions')">+</div>
@@ -268,17 +273,17 @@ function getFollowerCard() {
             <div class="label" style="width:170px">
               <div class='c_add' data-add onclick="addElement('characters')">+</div>
               <select data-input='gender'>
-                <option value="0">Any Gender</option>
-                <option value="3">Either</option>
+                <option value="0">Choose</option>
                 <option value="1">Male</option>
                 <option value="2">Female</option>
+                <option value="3">Any Gender</option>
               </select>
             </div>
           </div>
           <textarea rows='2' data-input='description' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Peter Quill is an interstellar adventurer who was abducted from Earth at a young age. He is the comedic hero of this galactic adventure."></textarea>
         </div>
       </div>
-      <input type='submit' value='Create Casting Call'><input type='button' id='script_input' value='Upload Script' onclick="document.getElementById('script_file').click()"><input type='button' id='poster_input' value='Upload Poster' onclick="document.getElementById('poster_file').click()">
+      <input type='submit' value='Create Call'><input type='button' id='script_input' value='Upload Script' onclick="document.getElementById('script_file').click()"><input type='button' id='poster_input' value='Upload Poster' onclick="document.getElementById('poster_file').click()">
     </form>
   </div>
 </div>
@@ -334,9 +339,23 @@ function getFollowerCard() {
           </select>
         </div>
       </div>
+      <div class="label">
+        <p>Storyline</p>
+        <textarea name='storyline' rows='3' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Brash space adventurer Peter Quill (Chris Pratt) finds himself the quarry of relentless bounty hunters after he steals an orb coveted by Ronan, a powerful villain."></textarea>
+      </div>
+      <input type='submit' value='Update Call'><input type='button' id='edit_script_input' value='Update Script' onclick="document.getElementById('edit_script_file').click()"><input type='button' id='edit_poster_input' value='Update Poster' onclick="document.getElementById('edit_poster_file').click()">
+    </form>
+  </div>
+</div>
+<div id="popup_add" class='popup'>
+  <div class="card">
+    <form onsubmit="addToCall(this); return false">
+      <input type="hidden" name="func" value="addToCall">
+      <input type="hidden" name="call_id" id="add_call_id">
+      <h1>Add To Call</h1>
       <div class='row'>
         <div class="label">
-          <p>Additional Audition Time</p>
+          <p>Audition Time</p>
         </div>
         <div class="label">
           <p>Place</p>
@@ -345,7 +364,7 @@ function getFollowerCard() {
       <div id="edit_auditions">
         <div class='row' data-row>
           <div class="label">
-            <input type='text' data-input='time' spellcheck='false' autocomplete='off' maxlength='19' placeholder='9/23 5:30pm'>
+            <input type='text' data-input='time' spellcheck='false' autocomplete='off' maxlength='19' placeholder='9/20 12:00pm'>
           </div>
           <div class="label">
             <div class='c_add' data-add onclick="addElement('edit_auditions')">+</div>
@@ -355,7 +374,7 @@ function getFollowerCard() {
       </div>
       <div class='row'>
         <div class="label">
-          <p>Additional Shooting Dates From</p>
+          <p>Shooting Dates From</p>
         </div>
         <div class="label">
           <p>To</p>
@@ -373,10 +392,15 @@ function getFollowerCard() {
         </div>
       </div>
       <div class="label">
-        <p>Storyline</p>
-        <textarea name='storyline' rows='3' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Brash space adventurer Peter Quill (Chris Pratt) finds himself the quarry of relentless bounty hunters after he steals an orb coveted by Ronan, a powerful villain."></textarea>
+        <p>Collaborators</p>
       </div>
-      <h2>ADDITIONAL CHARACTERS</h2>
+      <div id="edit_collaborators">
+        <div class="label" data-row>
+          <div class='c_add' data-add onclick="addElement('edit_collaborators')">+</div>
+          <input type='text' data-input='name' spellcheck='false' autocomplete='off' maxlength='19' placeholder="smith100">
+        </div>
+      </div>
+      <h2>CHARACTERS</h2>
       <hr>
       <div class='row'>
         <div class="label" style="width:170px">
@@ -408,16 +432,16 @@ function getFollowerCard() {
               <div class='c_add' data-add onclick="addElement('edit_characters')">+</div>
               <select data-input='gender'>
                 <option value="0">Choose</option>
-                <option value="3">Any Gender</option>
                 <option value="1">Male</option>
                 <option value="2">Female</option>
+                <option value="3">Any Gender</option>
               </select>
             </div>
           </div>
           <textarea rows='2' data-input='description' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Peter Quill is an interstellar adventurer who was abducted from Earth at a young age. He is the comedic hero of this galactic adventure."></textarea>
         </div>
       </div>
-      <input type='submit' value='Update Casting Call'><input type='button' id='edit_script_input' value='Update Script' onclick="document.getElementById('edit_script_file').click()"><input type='button' id='edit_poster_input' value='Update Poster' onclick="document.getElementById('edit_poster_file').click()">
+      <input type='submit' value='Add To Call'>
     </form>
   </div>
 </div>
@@ -470,7 +494,7 @@ function getFollowerCard() {
       <div class='row'>
         <div class="label">
           <p>Youtube Link ...</p>
-          <input type='text' name='youtubeLink' spellcheck='false' autocomplete='off' maxlength='40' placeholder="youtube.com/watch?v=5mF0le5Y96M">
+          <input type='text' name='youtubeLink' spellcheck='false' autocomplete='off' maxlength='90' placeholder="youtube.com/watch?v=5mF0le5Y96M">
         </div>
         <div class="label">
           <p>or Vimeo Link</p>
@@ -482,11 +506,11 @@ function getFollowerCard() {
   </div>
 </div>
 <div id="popup_photo" class='popup popup_photo'></div>
-<div id="popup_confirm_interest" class='popup'>
+<div id="popup_confirm" class='popup'>
   <div class='card' style='text-align:center'>
     <h1>Confirm</h1>
-    <p>Are you sure you want to revoke your interest?</p>
-    <input type='button' value='Revoke Interest' id='confirm_yes'>
+    <p>Are you sure you want to do this?</p>
+    <input type='button' value='Yes' id='confirm_yes'>
   </div>
 </div>
 <div id="popup_email" class='popup'>
@@ -497,9 +521,9 @@ function getFollowerCard() {
       <input type="hidden" name="call_id" value="0" id='email_call_id'>
       <h1>Email Blast</h1>
       <div class="label">
-        <textarea rows='5' name='body' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="This will reach all those currently interested in the casting call."></textarea>
+        <textarea rows='5' name='body' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="This email will go to all those currently interested in the casting call."></textarea>
       </div>
-      <input type='submit' value='Send Email'><input type='button' id='attachment_input' value='Add Attachment' onclick="document.getElementById('attachment_file').click()">
+      <input type='submit' value='Send'><input type='button' id='attachment_input' value='Add Attachment' onclick="document.getElementById('attachment_file').click()">
     </form>
   </div>
 </div>
@@ -556,6 +580,28 @@ function getFollowerCard() {
 <!-- SCRIPTS -->
 
 <script>
+  function closeCall(call_id) {
+    togglePopup(document.getElementById("popup_confirm"))
+    document.getElementById("confirm_yes").onclick = function() {
+      post("/resources/ajax/functions.php", {"func": "closeCall", "call_id": call_id}, function(r) {
+        r = JSON.parse(r)
+        if (r["status"] == "ok") window.location.href = "/"
+        else addAlert(r['message'])
+      })
+    }
+  }
+
+  function removeRow(type, id) {
+    togglePopup(document.getElementById("popup_confirm"))
+    document.getElementById("confirm_yes").onclick = function() {
+      post("/resources/ajax/functions.php", {"func": "remove", "type": type, "id": id}, function(r) {
+        r = JSON.parse(r)
+        if (r["status"] == "ok") window.location.href = "/"
+        else addAlert(r['message'])
+      })
+    }
+  }
+
   function email(form) {
     post("/resources/ajax/functions.php", parse(form), function(r) {
       r = JSON.parse(r)
@@ -569,7 +615,7 @@ function getFollowerCard() {
   }
 
   function interestedConfirm(sender, char_id) {
-    togglePopup(document.getElementById("popup_confirm_interest"))
+    togglePopup(document.getElementById("popup_confirm"))
     document.getElementById("confirm_yes").onclick = function() {
       post("/resources/ajax/functions.php", {"func": "interested", "char_id": char_id}, function(r) {
         r = JSON.parse(r)
@@ -603,10 +649,23 @@ function getFollowerCard() {
 
   function editCall(form) {
     var data = parse(form)
+    post("/resources/ajax/functions.php", data, function(r) {
+      r = JSON.parse(r)
+      if (r["status"] == "ok") {
+        togglePopup(currentPopup)
+        setTimeout(function() {
+          window.location.href = "/"
+        },300)
+      } else addAlert(r['message'])
+    })
+  }
+
+  function addToCall(form) {
+    var data = parse(form)
     data["auditions"] = parseArray("edit_auditions")
     data["shootings"] = parseArray('edit_shootings')
     data["characters"] = parseArray('edit_characters')
-    console.log(data['characters'])
+    data["collaborators"] = parseArray('edit_collaborators')
     post("/resources/ajax/functions.php", data, function(r) {
       r = JSON.parse(r)
       if (r["status"] == "ok") {
@@ -633,51 +692,6 @@ function getFollowerCard() {
       } else addAlert(r['message'])
     })
   }
-        // popup.querySelector("[data-collaborators]").innerHTML = ""
-        // r['collaborators'].forEach(function(d) {
-        //   popup.querySelector("[data-collaborators]").innerHTML += "<div class='c_text'><a href='/user/"+d['d_id']+"/'>"+d['firstname']+" "+d['lastname']+"</a></div>"
-        // })
-        // popup.querySelector("[data-auditions]").innerHTML = ""
-        // r['auditions'].forEach(function(d) {
-        //   popup.querySelector("[data-auditions]").innerHTML += "<div class='row'> \
-        //                                                           <div class='label' style='width: 205px'> \
-        //                                                             <div class='c_text'>"+d['audition_time']+"</div> \
-        //                                                           </div> \
-        //                                                           <div class='label'> \
-        //                                                             <div class='c_text'>"+d['audition_place']+"</div> \
-        //                                                           </div> \
-        //                                                         </div>"
-        // })
-        // popup.querySelector("[data-shootings]").innerHTML = ""
-        // r['shootings'].forEach(function(d) {
-        //   popup.querySelector("[data-shootings]").innerHTML += "<div class='row'> \
-        //                                                           <div class='label' style='width: 205px'> \
-        //                                                             <div class='c_text'>"+d['shooting_from']+"</div> \
-        //                                                           </div> \
-        //                                                           <div class='label'> \
-        //                                                             <div class='c_text'>"+d['shooting_to']+"</div> \
-        //                                                           </div> \
-        //                                                         </div>"
-        // })
-        // popup.querySelector("[data-characters]").innerHTML = ""
-        // r['characters'].forEach(function(d) {
-        //   popup.querySelector("[data-characters]").innerHTML += "<div class='row'> \
-        //                                                           <div class='label' style='width:160px'> \
-        //                                                             <div class='c_text'><b>"+d['name']+"</b></div> \
-        //                                                           </div> \
-        //                                                           <div class='label' style='width:75px'> \
-        //                                                             <div class='c_text'>"+d['min']+"</div> \
-        //                                                           </div> \
-        //                                                           <div class='label' style='width:75px'> \
-        //                                                             <div class='c_text'>"+d['max']+"</div> \
-        //                                                           </div> \
-        //                                                           <div class='label' style='width:173px; position: relative'> \
-        //                                                             <input type='button' style='top: -11px' class='c_edit "+(d['interested'] ? 'interested' : '')+"' value='Interested' onclick='interested(this, "+d['id']+")' "+(d['can_interested'] ? '' : 'disabled')+"> \
-        //                                                             <div class='c_text'>"+(d['gender']==1?"Male":d['gender']==2?"Female":"Any Gender")+"</div> \
-        //                                                           </div> \
-        //                                                         </div> \
-        //                                                         <div class='c_text'><p style='width: 405px'>"+d['description']+"</p></div>"
-        // })
 
   function uploadProfilePic(input) {
     if (input.files[0].size <= 999999) {

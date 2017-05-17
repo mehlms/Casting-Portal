@@ -153,8 +153,6 @@ $data = isset($_GET['data']) ? intval($_GET['data']) : null;
       })
     }
 
-    // POPUPS
-
     function getCall(id) {
       post("/resources/ajax/functions.php", {"func": "getCall", "id": id}, function(r) {
         r = JSON.parse(r)
@@ -209,13 +207,13 @@ $data = isset($_GET['data']) ? intval($_GET['data']) : null;
                                                                     <div class='label' style='width:160px'> \
                                                                       <div class='c_text'><b>"+d['name']+"</b></div> \
                                                                     </div> \
-                                                                    <div class='label' style='width:75px'> \
+                                                                    <div class='label' style='width:70px'> \
                                                                       <div class='c_text'>"+d['min']+"</div> \
                                                                     </div> \
-                                                                    <div class='label' style='width:75px'> \
+                                                                    <div class='label' style='width:70px'> \
                                                                       <div class='c_text'>"+d['max']+"</div> \
                                                                     </div> \
-                                                                    <div class='label' style='width:173px; position: relative'> \
+                                                                    <div class='label' style='width:183px; position: relative'> \
                                                                       <input type='button' style='top: -11px' class='c_edit "+(d['interested'] ? 'interested' : '')+"' value='Interested' onclick='interested(this, "+d['id']+")' "+(d['can_interested'] ? '' : 'disabled')+"> \
                                                                       <div class='c_text'>"+(d['gender']==1?"Male":d['gender']==2?"Female":"Any Gender")+"</div> \
                                                                     </div> \
@@ -238,13 +236,18 @@ $data = isset($_GET['data']) ? intval($_GET['data']) : null;
       post("/resources/ajax/functions.php", {"func": "getNotifications"}, function(r) {
         r = JSON.parse(r)
         document.getElementById("notifications").querySelector("[data-notifications]").innerHTML = "";
+        if (r['notifications'].length == 0) document.getElementById("notifications").querySelector("[data-notifications]").innerHTML += "<p>You have no notifications.</p>"
         r['notifications'].forEach(function(d) {
           if (d['type'] == 1 && d['heart'] == 1) {
             document.getElementById("notifications").querySelector("[data-notifications]").innerHTML += "<a href='/user/"+d['id']+"/'><b>"+d['firstname']+" "+d['lastname']+"</b><br> recommends you</a>"
           } else if (d['type'] == 1) {
             document.getElementById("notifications").querySelector("[data-notifications]").innerHTML += "<a href='/user/"+d['id']+"/'><b>"+d['firstname']+" "+d['lastname']+"</b> said<br> \""+d['comment']+"\"</a>"
           } else if (d['type'] == 2) {
-            document.getElementById("notifications").querySelector("[data-notifications]").innerHTML += "<a href='/user/"+d['id']+"/'><b>"+d['firstname']+" "+d['lastname']+"</b> is<br> interested in \""+d['name']+"\"</a>"
+            document.getElementById("notifications").querySelector("[data-notifications]").innerHTML += "<a href='/user/"+d['id']+"/'><b>"+d['firstname']+" "+d['lastname']+"</b><br> is interested in <b>"+d['name']+"</b></a>"
+          } else if (d['type'] == 3) {
+            document.getElementById("notifications").querySelector("[data-notifications]").innerHTML += "<a onclick='getCall("+d['id']+")'>You matched with <b>"+d['title']+"</b></a>"
+          } else if (d['type'] == 4) {
+            document.getElementById("notifications").querySelector("[data-notifications]").innerHTML += "<a onclick='getCall("+d['id']+")'><b>"+d['firstname']+" "+d['lastname']+"</b> posted a new call <b>"+d['title']+"</b></a>"
           }
         })
       })
@@ -315,10 +318,10 @@ $data = isset($_GET['data']) ? intval($_GET['data']) : null;
           <div class="label" style="width:160px">
             <p>Name</p>
           </div>
-          <div class="label" style="width:75px">
+          <div class="label" style="width:70px">
             <p>Min Age</p>
           </div>
-          <div class="label" style="width:75px">
+          <div class="label" style="width:70px">
             <p>Max Age</p>
           </div>
           <div class="label" style="width:170px">

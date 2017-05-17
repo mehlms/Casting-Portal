@@ -48,14 +48,14 @@ $calls = $db->query("SELECT calls.id, calls.title, class, (SELECT genre FROM gen
         <p>Include These Genres</p>
         <?php
         $genres = $db->query("SELECT * FROM genres LEFT JOIN (SELECT genre_id, COUNT(*) as checked FROM genresFilter WHERE a_id=".$MYACCOUNT['a_id']." GROUP BY genre_id) as t2 ON genres.id=t2.genre_id ORDER BY genres.id ASC")->fetchAll();
-        foreach ($genres as $d) echo "<label><input type='checkbox' name='genresFilter[".$d['id']."]' ".($d['checked']?"":"checked")."><input type='button' value='".$d['genre']."'></label> ";
+        foreach ($genres as $d) echo "<input type='checkbox' id='genresFilter".$d['id']."' name='genresFilter[".$d['id']."]' ".($d['checked']?"":"checked")."><label for='genresFilter".$d['id']."'><input type='button' value='".$d['genre']."'></label> ";
         ?>
       </div>
       <div class="label" style='text-align:center'>
         <p>Include These Classes</p>
         <?php
         $classes = $db->query("SELECT * FROM classes LEFT JOIN (SELECT class_id, COUNT(*) as checked FROM classesFilter WHERE a_id=".$MYACCOUNT['a_id']." GROUP BY class_id) as t2 ON classes.id=t2.class_id ORDER BY classes.id ASC")->fetchAll();
-        foreach ($classes as $d) echo "<label><input type='checkbox' name='classesFilter[".$d['id']."]' ".($d['checked']?"":"checked")."><input type='button' value='".str_replace("Graduate ", "", str_replace("Undergraduate ", "", $d['class']))."'></label> ";
+        foreach ($classes as $d) echo "<input type='checkbox' id='classesFilter".$d['id']."' name='classesFilter[".$d['id']."]' ".($d['checked']?"":"checked")."><label for='classesFilter".$d['id']."'><input type='button' value='".str_replace("Graduate ", "", str_replace("Undergraduate ", "", $d['class']))."'></label> ";
         ?>
       </div>
       <input type='submit' value='Save'>
@@ -69,7 +69,6 @@ $calls = $db->query("SELECT calls.id, calls.title, class, (SELECT genre FROM gen
   <input type='file' id="profile_pic_file" onchange="uploadProfilePic(this)" style="display:none" accept="image/x-png,image/jpeg">
   <div class='c_pic' onclick="document.getElementById('profile_pic_file').click()" style="background-image: url('<?php echo $asset_profile; ?>')"></div>
   <div class='card'>
-    <input type='button' class='c_edit <?php echo $MYACCOUNT['mode'] ? "c_director" : "c_talent" ?>'>
     <h1 id="name"><?php echo $MYACCOUNT['firstname']." ".$MYACCOUNT['lastname'] ?></h1>
     <p><b><?php echo ($MYACCOUNT["gender"] == 1) ? "Male" : "Female"; ?> · Looks Between <?php echo $MYACCOUNT['looks_min']."-".$MYACCOUNT['looks_max'] ?></b></p>
   </div>

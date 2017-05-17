@@ -127,6 +127,20 @@ function getPraiseCard() {
     </form>
   </div>
 </div>
+<div id="popup_email" class='popup'>
+  <div class='card'>
+    <form onsubmit='email(this); return false'>
+      <input type="hidden" name="func" value="email">
+      <input type='file' id="attachment_file" name='attachment' onchange="(this.files[0].size > 999999) ? addAlert('File is larger than 1mb') : document.getElementById('attachment_input').value='File: '+this.value.substr(12, 9)+'..'" style="display:none">
+      <input type="hidden" name="user_id" value="<?php echo $ACCOUNT['id'] ?>">
+      <h1>Email</h1>
+      <div class="label">
+        <textarea rows='5' name='body' spellcheck='false' autocomplete='off' maxlength='1000' placeholder='This email will go directly to the selected user.'></textarea>
+      </div>
+      <input type='submit' value='Send'><input type='button' id='attachment_input' value='Add Attachment' onclick="document.getElementById('attachment_file').click()">
+    </form>
+  </div>
+</div>
 
 <!-- PROFILE HEADER -->
 
@@ -138,6 +152,7 @@ function getPraiseCard() {
     <p><b><?php echo $ACCOUNT['mode'] ? "Director" : "Talent" ?> · <?php echo ($ACCOUNT["gender"] == 1) ? "Male" : "Female"; ?> · Age <?php echo $ACCOUNT['age'] ?></b></p>
   </div>
   <div class='c_buttons'>
+    <input type='button' value='Send Email' onclick="togglePopup(document.getElementById('popup_email'))"><br>
     <?php
     if (!$MYACCOUNT['mode'] && $ACCOUNT['mode']) {
       echo "
@@ -148,7 +163,6 @@ function getPraiseCard() {
       </form>";
     }
     ?>
-    <input type='button' value='Send Email' onclick="togglePopup(document.getElementById('popup_basic'))"><br>
   </div>
 </div>
 
@@ -175,6 +189,18 @@ function getPraiseCard() {
 <!-- SCRIPTS -->
 
 <script>
+  function email(form) {
+    post("/resources/ajax/functions.php", parse(form), function(r) {
+      r = JSON.parse(r)
+      if (r["status"] == "ok") {
+        togglePopup(currentPopup)
+        setTimeout(function() {
+          window.location.href = window.location.href
+        },300)
+      } else addAlert(r['message'])
+    })
+  }
+
   function praise(form) {
     post("/resources/ajax/functions.php", parse(form), function(r) {
       r = JSON.parse(r)

@@ -76,6 +76,10 @@ else if ($MYACCOUNT && $func == "postCall") {
   $db->beginTransaction();
   try {
     if (!$title || !$genre || !$type || !$storyline || !count($auditions) || !count($shootings) || !count($characters)) throw new Exception();
+    if ($genre == $genre2) {
+      echo json_encode(array("status"=>"failed", "message"=>"Please choose different genres."));
+      return;
+    }
     $db->query("INSERT INTO calls VALUES (SUBSTRING((SELECT UUID_short()), 9), '$title', $type, $genre, $genre2, '$storyline', NOW())");
     $call_id = $db->query("SELECT id FROM calls ORDER BY id DESC")->fetch()['id'];
     $db->query("INSERT INTO collaborators VALUES (null, $call_id, ".$MYACCOUNT['d_id'].", NOW())");
@@ -222,15 +226,13 @@ else if ($MYACCOUNT && $func == 'addVideo') {
     if ($youtubeLink) {
       preg_match('/v=([^&]*)/', $youtubeLink, $matches);
       if ($matches) {
-        $link = $matches[1];
-        $db->query("INSERT INTO assets VALUES (null, $page_id, '$title', '$link', 3, NOW())");
-        echo json_encode(array("status"=>"ok", "message"=>"Added Video"));
+        $db->query("INSERT INTO assets VALUES (null, $page_id, '$title', '".$matches[1]."', 3, NOW())");
+        echo json_encode(array("status"=>"ok"));
       } else echo json_encode(array("status"=>"failed", "message"=>"Invalid URL"));
     } else if ($vimeoLink) {
       preg_match('/vimeo\.com\/(.*)/', $vimeoLink, $matches);
       if ($matches) {
-        $link = $matches[1];
-        $db->query("INSERT INTO assets VALUES (null, $page_id, '$title', '$link', 4, NOW())");
+        $db->query("INSERT INTO assets VALUES (null, $page_id, '$title', '".$matches[1]."', 4, NOW())");
         echo json_encode(array("status"=>"ok", "message"=>"Added Video"));
       } else echo json_encode(array("status"=>"failed", "message"=>"Invalid URL"));
     }
@@ -319,6 +321,42 @@ else if ($MYACCOUNT && $func == "emailBlast") {
   } else echo json_encode(array("status"=>"failed", "message"=>"You are not a collaborator on this call"));
 }
 
+else if ($MYACCOUNT && $func == "email") {
+  $user_id = getInt("user_id");
+  $email = $db->query("SELECT email FROM accounts WHERE id=$user_id")->fetch();
+  if ($email) {
+    $body = nl2br(get("body"));
+    $attachment = getFile("attachment");
+    if ($body) {
+      require '../../../inc/mailer/PHPMailerAutoload.php';
+      $mail = new PHPMailer;
+      $mail->isSMTP();
+      // $mail->SMTPDebug = 2;
+      // $mail->Debugoutput = 'html';
+      $mail->Host = 'smtp.gmail.com';
+      $mail->Port = 465;
+      $mail->SMTPSecure = 'ssl';
+      $mail->SMTPAuth = true;
+      $mail->Username = "helms107@mail.chapman.edu";
+      $mail->Password = "Cocokai1";
+      $mail->setFrom('helms107@mail.chapman.edu', 'Chapman Casting');
+      $mail->addReplyTo($MYACCOUNT['email']);
+      $mail->addCC($MYACCOUNT['email']);
+      $mail->addBCC($email['email']);
+
+      $mail->Subject = "Direct Message From ".$MYACCOUNT['firstname']." ".$MYACCOUNT['lastname'];
+      $mail->msgHTML($body."<br><br>");
+      $mail->AltBody = 'Sorry, your email client cannot display this email.';
+      if ($attachment) $mail->addAttachment($attachment['tmp_name'], $attachment['name']);
+
+      echo json_encode(array("status"=>"ok"));
+
+      fastcgi_finish_request();
+      $mail->send();
+    } else echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
+  } else echo json_encode(array("status"=>"failed", "message"=>"This user does not exist"));
+}
+
 else if ($MYACCOUNT && $func == 'updateMatch') {
   $looks_min = getInt("looks_min");
   $looks_max = getInt("looks_max");
@@ -346,14 +384,20 @@ else if ($MYACCOUNT && $func == 'getNotifications') {
   $notifications = array();
   if ($MYACCOUNT['mode']) {
     $praise = $db->query("SELECT accounts.a_id as id, heart, comment, firstname, lastname, praise.added, (SELECT 1) as type FROM praise JOIN accounts ON praise_from=accounts.a_id WHERE praise_to=".$MYACCOUNT['d_id']." LIMIT 30")->fetchAll();
-    $interested = $db->query("SELECT firstname, lastname, name, interested.added, (SELECT 2) as type FROM interested JOIN accounts ON interested.a_id=accounts.a_id JOIN characters ON interested.char_id=characters.id JOIN calls ON characters.call_id=calls.id JOIN collaborators ON collaborators.d_id=".$MYACCOUNT['d_id']." LIMIT 30")->fetchAll();
-    $notifications = array_merge($interested, $praise);
+    $interested = $db->query("SELECT accounts.d_id as id, firstname, lastname, name, interested.added, (SELECT 2) as type FROM interested JOIN accounts ON interested.a_id=accounts.a_id JOIN characters ON interested.char_id=characters.id JOIN calls ON characters.call_id=calls.id JOIN collaborators ON collaborators.d_id=".$MYACCOUNT['d_id']." LIMIT 30")->fetchAll();
+    $notifications = array_merge($praise, $interested);
     usort($notifications, 'sortDate');
   } else {
-    $praise = $db->query("SELECT heart, comment, firstname, lastname, praise.added, (SELECT 1) as type FROM praise JOIN accounts ON praise_from=accounts.d_id WHERE praise_to=".$MYACCOUNT['a_id'])->fetchAll();
-    $notifications = $praise;
-    // $matches = $db->query("SELECT firstname, lastname, name, interested.added, (SELECT 2) as type FROM interested JOIN accounts ON interested.a_id=accounts.a_id JOIN characters ON interested.char_id=characters.id JOIN calls ON characters.call_id=calls.id JOIN collaborators ON collaborators.d_id=".$MYACCOUNT['d_id'])->fetchAll();
-    // $notifications = array_merge($interested, $matches);
+    $praise = $db->query("SELECT accounts.d_id as id, heart, comment, firstname, lastname, praise.added, (SELECT 1) as type FROM praise JOIN accounts ON praise_from=accounts.d_id WHERE praise_to=".$MYACCOUNT['a_id']." LIMIT 30")->fetchAll();
+    $matches = $db->query("SELECT calls.id, title, calls.added, (SELECT 3) as type FROM calls
+                            JOIN (SELECT call_id, COUNT(*) as char_count FROM characters WHERE min<=".$MYACCOUNT['looks_max']." AND max>=".$MYACCOUNT['looks_min']." AND (gender=3 OR gender=".$MYACCOUNT['gender'].") GROUP BY call_id) as t2
+                            ON t2.call_id=calls.id
+                            WHERE calls.type NOT IN (SELECT class_id FROM classesFilter WHERE a_id=".$MYACCOUNT['a_id'].") AND
+                            calls.genre NOT IN (SELECT genre_id FROM genresFilter WHERE a_id=".$MYACCOUNT['a_id'].") AND
+                            calls.genre2 NOT IN (SELECT genre_id FROM genresFilter WHERE a_id=".$MYACCOUNT['a_id'].")")->fetchAll();
+    $following = $db->query("SELECT collaborators.call_id as id, calls.title, firstname, lastname, follow.added, (SELECT 4) as type FROM follow JOIN accounts ON follow_to=accounts.d_id JOIN collaborators ON accounts.d_id=collaborators.d_id JOIN calls ON collaborators.call_id=calls.id WHERE follow_from=".$MYACCOUNT['a_id']." LIMIT 30")->fetchAll();
+    $notifications = array_merge($praise, $matches);
+    $notifications = array_merge($notifications, $following);
     usort($notifications, 'sortDate');
   }
   echo json_encode(array("status"=>"ok", "notifications"=>array_splice($notifications, 0, 30)));
@@ -379,40 +423,18 @@ else if ($MYACCOUNT && $func == 'editCall') {
   $genre = getInt("genre");
   $genre2 = getInt("genre2");
   $storyline = get("storyline");
-  $auditions = getArray("auditions");
-  $shootings = getArray("shootings");
-  $characters = getArray("characters");
   $script = getFile('script');
   $poster = getFile('poster');
 
-  $check = $db->query("SELECT id FROM collaborators WHERE d_id=".$MYACCOUNT['d_id']." AND call_id=$call_id")->fetch();
-
   $db->beginTransaction();
   try {
+    $check = $db->query("SELECT id FROM collaborators WHERE d_id=".$MYACCOUNT['d_id']." AND call_id=$call_id")->fetch();
     if (!$title || !$genre || !$type || !$storyline || !$check) throw new Exception();
+    if ($genre == $genre2) {
+      echo json_encode(array("status"=>"failed", "message"=>"Please choose different genres."));
+      return;
+    }
     $db->query("UPDATE calls SET title='$title', type=$type, genre=$genre, genre2=$genre2, storyline='$storyline' WHERE id=$call_id");
-
-    foreach ($auditions as $d) {
-      $time = strToDate($d["time"]);
-      $place = htmlentities(addslashes($d["place"]));
-      if (!$time || !$place) throw new Exception();
-      $db->query("INSERT INTO auditions VALUES (null, $call_id, '$time', '$place')");
-    }
-    foreach ($shootings as $d) {
-      $from = strToDate($d["from"]);
-      $to = strToDate($d["to"]);
-      if (!$from || !$to) throw new Exception();
-      $db->query("INSERT INTO shootings VALUES (null, $call_id, '$from', '$to')");
-    }
-    foreach ($characters as $d) {
-      $name = htmlentities(addslashes($d["name"]));
-      $min = intval($d["min"]);
-      $max = intval($d["max"]);
-      $gender = intval($d["gender"]);
-      $description = htmlentities(addslashes($d["description"]));
-      if (!$name || !$min || !$max || !$gender || !$description) throw new Exception();
-      $db->query("INSERT INTO characters VALUES (null, $call_id, '$name', $min, $max, $gender, '$description')");
-    }
 
     if ($poster) {
       $src = null;
@@ -445,6 +467,114 @@ else if ($MYACCOUNT && $func == 'editCall') {
   }
 }
 
+else if ($MYACCOUNT && $func == 'addToCall') {
+  $call_id = getInt('call_id');
+  $auditions = getArray("auditions");
+  $shootings = getArray("shootings");
+  $characters = getArray("characters");
+  $collaborators = getArray("collaborators");
+
+  $db->beginTransaction();
+  try {
+    $check = $db->query("SELECT id FROM collaborators WHERE d_id=".$MYACCOUNT['d_id']." AND call_id=$call_id")->fetch();
+    if (!$check) throw new Exception();
+    foreach ($auditions as $d) {
+      $time = strToDate($d["time"]);
+      $place = htmlentities(addslashes(trim($d["place"])));
+      if (!$time || !$place) throw new Exception();
+      $db->query("INSERT INTO auditions VALUES (null, $call_id, '$time', '$place')");
+    }
+    foreach ($shootings as $d) {
+      $from = strToDate($d["from"]);
+      $to = strToDate($d["to"]);
+      if (!$from || !$to) throw new Exception();
+      $db->query("INSERT INTO shootings VALUES (null, $call_id, '$from', '$to')");
+    }
+    foreach ($collaborators as $d) {
+      $name = htmlentities(addslashes(trim($d["name"])));
+      $check = $db->query("SELECT d_id, (SELECT COUNT(*) FROM collaborators WHERE collaborators.d_id=accounts.d_id AND call_id=".$call_id.") as duplicate FROM accounts WHERE SUBSTRING(email, 1, 8)='$name'")->fetch();
+      if (!$check) {
+        echo json_encode(array("status"=>"failed", "message"=>$name." does not exist"));
+        return;
+      } else if ($check['duplicate']) {
+        echo json_encode(array("status"=>"failed", "message"=>$name." is already a collaborator"));
+        return;
+      }
+      $db->query("INSERT INTO collaborators VALUES (null, $call_id, ".$check['d_id'].", NOW())");
+    }
+    foreach ($characters as $d) {
+      $name = htmlentities(addslashes($d["name"]));
+      $min = intval($d["min"]);
+      $max = intval($d["max"]);
+      $gender = intval($d["gender"]);
+      $description = htmlentities(addslashes(trim($d["description"])));
+      if (!$name || !$min || !$max || !$gender || !$description) throw new Exception();
+      $db->query("INSERT INTO characters VALUES (null, $call_id, '$name', $min, $max, $gender, '$description')");
+    }
+    $db->commit();
+    echo json_encode(array("status"=>"ok"));
+  } catch (Exception $e) {
+    echo json_encode(array("status"=>"failed", "message"=>$e->getMessage()));
+  }
+}
+
+else if ($MYACCOUNT && $func == 'remove') {
+  $type = getInt('type');
+  $id = getInt('id');
+
+  if ($type == 1) {
+    $count = $db->query("SELECT COUNT(*) FROM auditions, (SELECT call_id FROM auditions WHERE id=".$id." LIMIT 1) as t2 JOIN collaborators ON t2.call_id=collaborators.call_id WHERE collaborators.d_id=".$MYACCOUNT['d_id']." AND auditions.call_id=t2.call_id GROUP BY auditions.call_id")->fetch()["COUNT(*)"];
+    if ($count > 1) $db->query("DELETE FROM auditions WHERE id=".$id);
+    else {
+      echo json_encode(array("status"=>"failed", "message"=>"You must have at least one audition time."));
+      return;
+    }
+  } else if ($type == 2) {
+    $count = $db->query("SELECT COUNT(*) FROM shootings, (SELECT call_id FROM shootings WHERE id=".$id." LIMIT 1) as t2 JOIN collaborators ON t2.call_id=collaborators.call_id WHERE collaborators.d_id=".$MYACCOUNT['d_id']." AND shootings.call_id=t2.call_id GROUP BY shootings.call_id")->fetch()["COUNT(*)"];
+    if ($count > 1) $db->query("DELETE FROM shootings WHERE id=".$id);
+    else {
+      echo json_encode(array("status"=>"failed", "message"=>"You must have at least one shooting date."));
+      return;
+    }
+  } else if ($type == 3) {
+    $count = $db->query("SELECT COUNT(*) FROM characters, (SELECT call_id FROM characters WHERE id=".$id." LIMIT 1) as t2 JOIN collaborators ON t2.call_id=collaborators.call_id WHERE collaborators.d_id=".$MYACCOUNT['d_id']." AND characters.call_id=t2.call_id GROUP BY characters.call_id")->fetch()["COUNT(*)"];
+    if ($count > 1) {
+      $db->query("DELETE FROM interested WHERE char_id=".$id);
+      $db->query("DELETE FROM characters WHERE id=".$id);
+    } else {
+      echo json_encode(array("status"=>"failed", "message"=>"You must have at least one character."));
+      return;
+    }
+  } else if ($type == 4) {
+    $count = $db->query("SELECT COUNT(*) FROM collaborators, (SELECT call_id FROM collaborators WHERE id=".$id." LIMIT 1) as t2 WHERE collaborators.d_id=".$MYACCOUNT['d_id']." AND collaborators.call_id=t2.call_id GROUP BY collaborators.call_id")->fetch()["COUNT(*)"];
+    if ($count > 1) $db->query("DELETE FROM collaborators WHERE id=".$id);
+    else {
+      echo json_encode(array("status"=>"failed", "message"=>"You must have at least one collaborator."));
+      return;
+    }
+  }
+  echo json_encode(array("status"=>"ok"));
+}
+
+else if ($MYACCOUNT && $func == 'closeCall') {
+  $call_id = getInt('call_id');
+
+  $db->beginTransaction();
+  $count = $db->query("SELECT COUNT(*) FROM calls JOIN collaborators ON calls.id=collaborators.call_id WHERE calls.id=$call_id AND collaborators.d_id=".$MYACCOUNT['d_id'])->fetch()["COUNT(*)"];
+  if ($count > 0) {
+    $db->query("DELETE FROM calls WHERE id=".$call_id);
+    $db->query("DELETE interested, characters FROM interested JOIN characters ON interested.char_id=characters.id AND call_id=".$call_id);
+    $db->query("DELETE FROM auditions WHERE call_id=".$call_id);
+    $db->query("DELETE FROM shootings WHERE call_id=".$call_id);
+    $db->query("DELETE FROM assets WHERE page_id=".$call_id);
+    $db->commit();
+  } else {
+    echo json_encode(array("status"=>"failed", "message"=>"You do not belong to this call"));
+    return;
+  }
+  echo json_encode(array("status"=>"ok"));
+}
+
 else echo json_encode(array("status"=>"failed", "message"=>"That function does not exist", "func"=>$func));
 
 function getConfirmation() {
@@ -463,7 +593,7 @@ function sortDate($a, $b) {
   $a = new DateTime($a['added']);
   $b = new DateTime($b['added']);
   if ($a == $b) return 0;
-  return ($a < $b) ? -1 : 1;
+  return ($a > $b) ? -1 : 1;
 }
 function strToDate($s) {
   $date = strtotime($s);

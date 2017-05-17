@@ -36,11 +36,12 @@ $db->query("CREATE TABLE genresFilter (id INT PRIMARY KEY AUTO_INCREMENT, a_id I
 
 $db->query("INSERT INTO api VALUES".
 "(null, 'helms107@mail.chapman.edu', '1234'),".
-"(null, 'guest@mail.chapman.edu', '1234'),".
-"(null, 'guest2@mail.chapman.edu', '1234'),".
-"(null, 'guest3@mail.chapman.edu', '1234'),".
-"(null, 'guest4@mail.chapman.edu', '1234'),".
-"(null, 'guest5@mail.chapman.edu', '1234')");
+"(null, 'benda106@mail.chapman.edu', '1234'),".
+"(null, 'guest100@mail.chapman.edu', '1234'),".
+"(null, 'guest101@mail.chapman.edu', '1234'),".
+"(null, 'guest102@mail.chapman.edu', '1234'),".
+"(null, 'guest103@mail.chapman.edu', '1234'),".
+"(null, 'guest104@mail.chapman.edu', '1234')");
 
 $db->query("INSERT INTO classes VALUES".
 "(null, 'Undergraduate Visual Storytelling (FTV 130)'),".

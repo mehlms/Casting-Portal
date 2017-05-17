@@ -139,7 +139,7 @@ select {
   padding-right: 35px;
 }
 
-.interested, :checked + input {
+.interested, :checked + label input {
   background-color: #FF0035 !important;
   color: white !important;
   border-color: #FF0035 !important;
@@ -247,21 +247,6 @@ a, input[type='submit'], input[type='button'], #header .c_notif_number {
 }
 #header .c_active {
   background-image: url('/resources/images/globe_h.png');
-}
-#header .c_notif_number {
-  font-size: 18px;
-  font-weight: 600;
-  background-color: white;
-  border: 3px solid #cfcfcf;
-  border-radius: 6px;
-  display: inline-block;
-  padding: 0px 4px;
-  position: relative;
-  top: 5px;
-  left: -7px;
-}
-#header .c_notif_active .c_notif_number {
-  opacity: 0;
 }
 #notifications {
   overflow: hidden;
@@ -443,7 +428,7 @@ a, input[type='submit'], input[type='button'], #header .c_notif_number {
 .popup hr {
   z-index: 0;
   border-top: 1px solid #ddd;
-  width: 514px;
+  width: 515px;
   margin-top: -17px;
   position: absolute;
   /*left: 0;*/
