@@ -48,10 +48,12 @@ $data = isset($_GET['data']) ? intval($_GET['data']) : null;
       for (var i = 0; i < objects.length; i++) {
         var inputs = objects[i].querySelectorAll('[data-input]')
         var object = {}
+        var gotValue = false
         for (var j = 0; j < inputs.length; j++) {
+          if (inputs[j].value != "" && inputs[j].value != "0") gotValue = true
           object[inputs[j].getAttribute('data-input')] = inputs[j].value
         }
-        data.push(object)
+        if (gotValue) data.push(object)
       }
       return JSON.stringify(data)
     }

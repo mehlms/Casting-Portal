@@ -82,7 +82,7 @@ else if ($MYACCOUNT && $func == "postCall") {
 
     foreach ($auditions as $d) {
       $time = strToDate($d["time"]);
-      $place = addslashes($d["place"]);
+      $place = htmlentities(addslashes($d["place"]));
       if (!$time || !$place) throw new Exception();
       $db->query("INSERT INTO auditions VALUES (null, $call_id, '$time', '$place')");
     }
@@ -93,11 +93,11 @@ else if ($MYACCOUNT && $func == "postCall") {
       $db->query("INSERT INTO shootings VALUES (null, $call_id, '$from', '$to')");
     }
     foreach ($characters as $d) {
-      $name = addslashes($d["name"]);
+      $name = htmlentities(addslashes($d["name"]));
       $min = intval($d["min"]);
       $max = intval($d["max"]);
       $gender = intval($d["gender"]);
-      $description = addslashes($d["description"]);
+      $description = htmlentities(addslashes($d["description"]));
       if (!$name || !$min || !$max || !$gender || !$description) throw new Exception();
       $db->query("INSERT INTO characters VALUES (null, $call_id, '$name', $min, $max, $gender, '$description')");
     }
@@ -111,15 +111,15 @@ else if ($MYACCOUNT && $func == "postCall") {
         return;
       }
       list($width, $height) = getimagesize($poster['tmp_name']);
-      $dst = imagecreatetruecolor(135, 205);
-      imagecopyresampled($dst, $src, 0, 0, 0, 0, 145, 205, $width, $width*(205.0/135.0));
-      $filename = time().rand(1000,9999).".jpg";
+      $dst = imagecreatetruecolor(154, 235);
+      imagecopyresampled($dst, $src, 0, 0, 0, 0, 154, 205, $width, $width*(235.0/154.0));
+      $filename = $call_id.".jpg";
       imagejpeg($dst, "../assets/posters/".$filename, 90);
       $db->query("INSERT INTO assets VALUES (null, $call_id, '', '$filename', 5, NOW())");
     }
     if ($script) {
       $ext = pathinfo($script['name'])['extension'];
-      $filename = time().rand(1000,9999).".".$ext;
+      $filename = $call_id.".".$ext;
       move_uploaded_file($script['tmp_name'], "../assets/scripts/".$filename);
       $db->query("INSERT INTO assets VALUES (null, $call_id, '', '$filename', 6, NOW())");
     }
@@ -373,28 +373,28 @@ else if ($MYACCOUNT && $func == 'search') {
 }
 
 else if ($MYACCOUNT && $func == 'editCall') {
-  $call_id = getID('call_id');
+  $call_id = getInt('call_id');
   $title = getWords("title");
   $type = getInt("type");
   $genre = getInt("genre");
   $genre2 = getInt("genre2");
+  $storyline = get("storyline");
   $auditions = getArray("auditions");
   $shootings = getArray("shootings");
-  $storyline = get("storyline");
   $characters = getArray("characters");
   $script = getFile('script');
   $poster = getFile('poster');
 
+  $check = $db->query("SELECT id FROM collaborators WHERE d_id=".$MYACCOUNT['d_id']." AND call_id=$call_id")->fetch();
+
   $db->beginTransaction();
   try {
-    if (!$title || !$genre || !$type || !$storyline) throw new Exception();
-    $db->query("INSERT INTO calls VALUES (SUBSTRING((SELECT UUID_short()), 9), '$title', $type, $genre, $genre2, '$storyline', NOW())");
-    $call_id = $db->query("SELECT id FROM calls ORDER BY id DESC")->fetch()['id'];
-    $db->query("INSERT INTO collaborators VALUES (null, $call_id, ".$MYACCOUNT['d_id'].", NOW())");
+    if (!$title || !$genre || !$type || !$storyline || !$check) throw new Exception();
+    $db->query("UPDATE calls SET title='$title', type=$type, genre=$genre, genre2=$genre2, storyline='$storyline' WHERE id=$call_id");
 
     foreach ($auditions as $d) {
       $time = strToDate($d["time"]);
-      $place = addslashes($d["place"]);
+      $place = htmlentities(addslashes($d["place"]));
       if (!$time || !$place) throw new Exception();
       $db->query("INSERT INTO auditions VALUES (null, $call_id, '$time', '$place')");
     }
@@ -405,11 +405,11 @@ else if ($MYACCOUNT && $func == 'editCall') {
       $db->query("INSERT INTO shootings VALUES (null, $call_id, '$from', '$to')");
     }
     foreach ($characters as $d) {
-      $name = addslashes($d["name"]);
+      $name = htmlentities(addslashes($d["name"]));
       $min = intval($d["min"]);
       $max = intval($d["max"]);
       $gender = intval($d["gender"]);
-      $description = addslashes($d["description"]);
+      $description = htmlentities(addslashes($d["description"]));
       if (!$name || !$min || !$max || !$gender || !$description) throw new Exception();
       $db->query("INSERT INTO characters VALUES (null, $call_id, '$name', $min, $max, $gender, '$description')");
     }
@@ -423,23 +423,25 @@ else if ($MYACCOUNT && $func == 'editCall') {
         return;
       }
       list($width, $height) = getimagesize($poster['tmp_name']);
-      $dst = imagecreatetruecolor(135, 205);
-      imagecopyresampled($dst, $src, 0, 0, 0, 0, 145, 205, $width, $width*(205.0/135.0));
-      $filename = time().rand(1000,9999).".jpg";
+      $dst = imagecreatetruecolor(154, 235);
+      imagecopyresampled($dst, $src, 0, 0, 0, 0, 154, 235, $width, $width*(235.0/154.0));
+      $filename = $call_id.".jpg";
       imagejpeg($dst, "../assets/posters/".$filename, 90);
+      $db->query("DELETE FROM assets WHERE page_id=$call_id AND type=5");
       $db->query("INSERT INTO assets VALUES (null, $call_id, '', '$filename', 5, NOW())");
     }
     if ($script) {
       $ext = pathinfo($script['name'])['extension'];
-      $filename = time().rand(1000,9999).".".$ext;
+      $filename = $call_id.".".$ext;
       move_uploaded_file($script['tmp_name'], "../assets/scripts/".$filename);
+      $db->query("DELETE FROM assets WHERE page_id=$call_id AND type=6");
       $db->query("INSERT INTO assets VALUES (null, $call_id, '', '$filename', 6, NOW())");
     }
 
     $db->commit();
     echo json_encode(array("status"=>"ok"));
   } catch (Exception $e) {
-    echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields"));
+    echo json_encode(array("status"=>"failed", "message"=>"Please fill in all fields."));
   }
 }
 

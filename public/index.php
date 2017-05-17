@@ -268,6 +268,7 @@ function getFollowerCard() {
             <div class="label" style="width:170px">
               <div class='c_add' data-add onclick="addElement('characters')">+</div>
               <select data-input='gender'>
+                <option value="0">Any Gender</option>
                 <option value="3">Either</option>
                 <option value="1">Male</option>
                 <option value="2">Female</option>
@@ -286,8 +287,8 @@ function getFollowerCard() {
     <form onsubmit="editCall(this); return false">
       <input type="hidden" name="func" value="editCall">
       <input type="hidden" name="call_id" id="edit_call_id">
-      <input type='file' id="script_file" name='script' onchange="(this.files[0].size > 999999) ? addAlert('File is larger than 1mb') : document.getElementById('script_input').value='Script: '+this.value.substr(12, 9)+'..'" style="display:none">
-      <input type='file' id="poster_file" name='poster' onchange="(this.files[0].size > 999999) ? addAlert('File is larger than 1mb') : document.getElementById('poster_input').value='Poster: '+this.value.substr(12, 9)+'..'" style="display:none" accept="image/x-png,image/jpeg">
+      <input type='file' id="edit_script_file" name='script' onchange="(this.files[0].size > 999999) ? addAlert('File is larger than 1mb') : document.getElementById('edit_script_input').value='Script: '+this.value.substr(12, 9)+'..'" style="display:none">
+      <input type='file' id="edit_poster_file" name='poster' onchange="(this.files[0].size > 999999) ? addAlert('File is larger than 1mb') : document.getElementById('edit_poster_input').value='Poster: '+this.value.substr(12, 9)+'..'" style="display:none" accept="image/x-png,image/jpeg">
 
       <h1>Edit Call</h1>
       <div class='row'>
@@ -406,7 +407,8 @@ function getFollowerCard() {
             <div class="label" style="width:170px">
               <div class='c_add' data-add onclick="addElement('edit_characters')">+</div>
               <select data-input='gender'>
-                <option value="3">Either</option>
+                <option value="0">Choose</option>
+                <option value="3">Any Gender</option>
                 <option value="1">Male</option>
                 <option value="2">Female</option>
               </select>
@@ -415,7 +417,7 @@ function getFollowerCard() {
           <textarea rows='2' data-input='description' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Peter Quill is an interstellar adventurer who was abducted from Earth at a young age. He is the comedic hero of this galactic adventure."></textarea>
         </div>
       </div>
-      <input type='submit' value='Update Casting Call'><input type='button' id='script_input' value='Update Script' onclick="document.getElementById('script_file').click()"><input type='button' id='poster_input' value='Update Poster' onclick="document.getElementById('poster_file').click()">
+      <input type='submit' value='Update Casting Call'><input type='button' id='edit_script_input' value='Update Script' onclick="document.getElementById('edit_script_file').click()"><input type='button' id='edit_poster_input' value='Update Poster' onclick="document.getElementById('edit_poster_file').click()">
     </form>
   </div>
 </div>
@@ -584,7 +586,7 @@ function getFollowerCard() {
   }
 
   function postCall(form) {
-    data = parse(form)
+    var data = parse(form)
     data["auditions"] = parseArray("auditions")
     data["shootings"] = parseArray('shootings')
     data["characters"] = parseArray('characters')
@@ -599,11 +601,12 @@ function getFollowerCard() {
     })
   }
 
-  function postCall(form) {
-    data = parse(form)
+  function editCall(form) {
+    var data = parse(form)
     data["auditions"] = parseArray("edit_auditions")
     data["shootings"] = parseArray('edit_shootings')
     data["characters"] = parseArray('edit_characters')
+    console.log(data['characters'])
     post("/resources/ajax/functions.php", data, function(r) {
       r = JSON.parse(r)
       if (r["status"] == "ok") {
@@ -620,6 +623,7 @@ function getFollowerCard() {
       r = JSON.parse(r)
       if (r["status"] == "ok") {
         var popup = document.getElementById("popup_edit")
+        document.getElementById("edit_call_id").value = id
         popup.querySelector("input[name='title']").value = r['call']['title']
         popup.querySelector("select[name='type']").selectedIndex = r['call']['type']
         popup.querySelector("select[name='genre']").selectedIndex = r['call']['genre']
