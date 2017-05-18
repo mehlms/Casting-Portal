@@ -56,7 +56,7 @@ else if ($MYACCOUNT && $func == "getCall") {
     $collaborators = $db->query("SELECT collaborators.d_id, firstname, lastname FROM collaborators JOIN accounts ON collaborators.d_id=accounts.d_id WHERE call_id=$id ORDER BY collaborators.added")->fetchAll();
     $auditions = $db->query("SELECT *, DATE_FORMAT(audition_time, '%M %D %l:%i%p') as audition_time FROM auditions WHERE call_id=$id")->fetchAll();
     $shootings = $db->query("SELECT DATE_FORMAT(shooting_from, '%M %D') as shooting_from, DATE_FORMAT(shooting_to, '%M %D') as shooting_to FROM shootings WHERE call_id=$id")->fetchAll();
-    $characters = $db->query("SELECT id, name, min, max, gender, description, (SELECT COUNT(*) FROM interested WHERE char_id=characters.id AND a_id=$page_id) as interested, (SELECT COUNT(*) FROM characters as c2 WHERE ".$MYACCOUNT['mode']."=0 AND characters.id=c2.id AND ".$MYACCOUNT['age'].">=min AND ".$MYACCOUNT['age']."<=max AND (gender=3 OR gender=".$MYACCOUNT['gender'].")) as can_interested FROM characters WHERE call_id=$id ORDER BY id ASC")->fetchAll();
+    $characters = $db->query("SELECT id, name, min, max, gender, description, (SELECT COUNT(*) FROM interested WHERE char_id=characters.id AND a_id=$page_id) as interested, (SELECT COUNT(*) FROM characters as c2 WHERE ".$MYACCOUNT['mode']."=0 AND characters.id=c2.id AND ".$MYACCOUNT['looks_max'].">=min AND ".$MYACCOUNT['looks_min']."<=max AND (gender=3 OR gender=".$MYACCOUNT['gender'].")) as can_interested FROM characters WHERE call_id=$id ORDER BY id ASC")->fetchAll();
     echo json_encode(array("status"=>"ok", "call"=>$call, "collaborators"=>$collaborators, "auditions"=>$auditions, "shootings"=>$shootings, "characters"=>$characters));
   } else echo json_encode(array("status"=>"failed", "message"=>"That call does not exist"));
 }
@@ -138,7 +138,7 @@ else if ($MYACCOUNT && $func == "postCall") {
 else if ($MYACCOUNT && $func == 'interested') {
   $char_id = getInt("char_id");
 
-  $check = $db->query("SELECT COUNT(*) as interested, (SELECT COUNT(*) FROM assets WHERE page_id=".$MYACCOUNT['a_id']." AND type=1) as profile_pic, (SELECT COUNT(*) FROM characters WHERE characters.id=$char_id AND ".$MYACCOUNT['age'].">=min AND ".$MYACCOUNT['age']."<=max AND (gender=3 OR gender=".$MYACCOUNT['gender'].")) as can_interested FROM interested WHERE a_id=".$MYACCOUNT['a_id']." AND char_id=$char_id")->fetch();
+  $check = $db->query("SELECT COUNT(*) as interested, (SELECT COUNT(*) FROM assets WHERE page_id=".$MYACCOUNT['a_id']." AND type=1) as profile_pic, (SELECT COUNT(*) FROM characters WHERE characters.id=$char_id AND ".$MYACCOUNT['looks_max'].">=min AND ".$MYACCOUNT['looks_min']."<=max AND (gender=3 OR gender=".$MYACCOUNT['gender'].")) as can_interested FROM interested WHERE a_id=".$MYACCOUNT['a_id']." AND char_id=$char_id")->fetch();
   if ($check['interested']) {
     $db->query("DELETE FROM interested WHERE a_id=".$MYACCOUNT['a_id']." AND char_id=$char_id");
     echo json_encode(array("status"=>"ok", "message"=>"Revoked interest", "interested"=>0));
