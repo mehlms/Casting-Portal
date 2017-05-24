@@ -14,9 +14,9 @@ Things that were NOT completed
 
 Required software
 
-- PHP-FPM 5.6
-- Latest NGINX
-- MySQL
+- PHP-FPM 5.6 - http://php.net/downloads.php - To my understanding php-fpm comes with php core, however I downloaded php-fpm and all these packages easily through Homebrew, Chris got it working on his Windows machine so we can ask him too
+- NGINX 1.8.1 - http://nginx.org/en/download.html - I'm sure latest stable version would be fine
+- MySQL 5.7.16 - https://dev.mysql.com/downloads/mysql/
 
 OTHER NOTES / TO DO'S
 
