@@ -14,6 +14,34 @@ $data = isset($_GET['data']) ? intval($_GET['data']) : null;
   <link rel='stylesheet' href='/resources/chapman.css'>
 
   <script type='text/javascript'>
+    function sendForm(filename, form) {
+      post("/resources/ajax/"+filename+".php", parse(form), function(r) {
+        try {
+          j = JSON.parse(r)
+          if (j["status"] == "ok") window.location.href = window.location.href
+          addAlert(j["message"])
+        } catch (error) {
+          console.log("ERROR: " + error + "\nRESPONSE: " + r)
+        }
+      })
+    }
+
+    function sendFormPopup(filename, form) {
+      post("/resources/ajax/"+filename+".php", parse(form), function(r) {
+        try {
+          r = JSON.parse(r)
+          if (r["status"] == "ok") {
+            togglePopup(currentPopup)
+            setTimeout(function() {
+              window.location.href = window.location.href
+            }, 300)
+          } else addAlert(r['message'])
+        } catch (error) {
+          console.log("ERROR: " + error + "\nRESPONSE: " + r)
+        }
+      })
+    }
+
     function post(url, data, callback) {
       var r = new XMLHttpRequest()
       r.open("POST", url, true)
@@ -142,7 +170,7 @@ $data = isset($_GET['data']) ? intval($_GET['data']) : null;
     }
     function search() {
       var query = document.getElementById('search_query').value
-      post("/resources/ajax/functions.php", {'func': 'search', 'query': query}, function(r) {
+      post("/resources/ajax/search.php", {'query': query}, function(r) {
         r = JSON.parse(r)
         document.getElementById('search').innerHTML = ""
         r['results'].forEach(function(d) {
@@ -154,7 +182,7 @@ $data = isset($_GET['data']) ? intval($_GET['data']) : null;
     }
 
     function getCall(id) {
-      post("/resources/ajax/functions.php", {"func": "getCall", "id": id}, function(r) {
+      post("/resources/ajax/call_get.php", {"id": id}, function(r) {
         r = JSON.parse(r)
         if (r["status"] == "ok") {
           var popup = document.getElementById("popup_call")
@@ -225,15 +253,31 @@ $data = isset($_GET['data']) ? intval($_GET['data']) : null;
       })
     }
     function interested(sender, char_id) {
-      post("/resources/ajax/functions.php", {"func": "interested", "char_id": char_id}, function(r) {
+      post("/resources/ajax/interested.php", {"char_id": char_id}, function(r) {
         r = JSON.parse(r)
         if (r['status'] == 'ok' && r['interested']) sender.className = "c_edit interested"
         else if (r['status'] == 'ok' && !r['interested']) sender.className = "c_edit"
         else addAlert(r['message'])
       })
     }
+    function interestedConfirm(sender, char_id) {
+      togglePopup(document.getElementById("popup_confirm"))
+      document.getElementById("confirm_yes").onclick = function() {
+        post("/resources/ajax/interested.php", {"char_id": char_id}, function(r) {
+          r = JSON.parse(r)
+          if (r['status'] == 'ok' && r['interested']) sender.className = "interested"
+          else if (r['status'] == 'ok' && !r['interested']) {
+            sender.className = ""
+            togglePopup(currentPopup)
+            setTimeout(function() {
+              window.location.href = "/"
+            },300)
+          } else addAlert(r['message'])
+        })
+      }
+    }
     function getNotifications() {
-      post("/resources/ajax/functions.php", {"func": "getNotifications"}, function(r) {
+      post("/resources/ajax/notifications.php", {}, function(r) {
         r = JSON.parse(r)
         document.getElementById("notifications").querySelector("[data-notifications]").innerHTML = "";
         if (r['notifications'].length == 0) document.getElementById("notifications").querySelector("[data-notifications]").innerHTML += "<p>You have no notifications.</p>"
@@ -281,11 +325,11 @@ $data = isset($_GET['data']) ? intval($_GET['data']) : null;
         <div class="label">
           <p>Class</p>
           <div class='c_text' data-class></div>
-        </div>
-        <div class="label" style='width: 205px'>
+        </div><br>
+        <div class="label">
           <p>Genre</p>
           <div class='c_text' data-genre></div>
-        </div>
+        </div><br>
         <div class="label">
           <p>Collaborators</p>
           <div data-collaborators></div>
@@ -312,6 +356,7 @@ $data = isset($_GET['data']) ? intval($_GET['data']) : null;
           <p>Storyline</p>
           <div class='c_text' data-storyline></div>
         </div>
+        <br>
         <h2>CHARACTERS</h2>
         <hr>
         <div class='row'>

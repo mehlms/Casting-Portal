@@ -4,8 +4,7 @@
   <div>
     <h1>Authenticate</h1>
     <p>Please sign in with your Chapman ID to access the COPA casting portal.</p>
-    <form onsubmit='login(this); return false'>
-      <input type='hidden' name='func' value='login'>
+    <form onsubmit='sendForm("login", this); return false'>
       <div class='row'>
         <div class='label'>
           <input type='text' placeholder='Email' spellcheck='false' autocomplete='off' maxlength='40' name='email'>
@@ -18,16 +17,5 @@
     </form>
   </div>
 </div>
-
-<script>
-  function login(form) {
-    post("/resources/ajax/functions.php", parse(form), function(r) {
-      console.log(r)
-      r = JSON.parse(r)
-      if (r["status"] == "ok") window.location = "/"
-      addAlert(r["message"])
-    })
-  }
-</script>
 
 <?php include "../inc/footer.php" ?>

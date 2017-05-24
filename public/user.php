@@ -93,10 +93,8 @@ function getPraiseCard() {
       <input type='hidden' name='func' value='praise'>
       <input type='hidden' name='praise_to' value='".$data."'>
       <input type='hidden' name='heart' value='1'>
-      <input type='submit' value='' class='c_edit c_heart c_add ".($ACCOUNT['heart'] ? "c_heart_filled" : '')."'>
-    </form>
-    <input type='button' class='c_edit c_add' value='+' onclick=\"togglePopup(document.getElementById('popup_praise'))\">
-    ";
+      <input type='submit' value='' class='c_edit c_heart c_add ".($ACCOUNT['heart'] ? "c_heart_filled" : '')."'><input type='button' class='c_edit c_add' value='+' onclick=\"togglePopup(document.getElementById('popup_praise'))\">
+    </form>";
   }
   echo "<h1>Praise</h1>";
   if (count($praise) == 0) echo "<p>No praise yet.</p>";
@@ -112,9 +110,7 @@ function getPraiseCard() {
 
 <!-- POPUPS -->
 
-<div id="popup_photo" class='popup popup_photo'></div>
 <div id="popup_praise" class='popup'>
-  <input type='button' class='c_edit' value="close" onclick="togglePopup(currentPopup)">
   <div class='card'>
     <form onsubmit='praise(this); return false;'>
       <input type='hidden' name="func" value="praise">
@@ -129,8 +125,7 @@ function getPraiseCard() {
 </div>
 <div id="popup_email" class='popup'>
   <div class='card'>
-    <form onsubmit='email(this); return false'>
-      <input type="hidden" name="func" value="email">
+    <form onsubmit="sendFormPopup('email', this); return false">
       <input type='file' id="attachment_file" name='attachment' onchange="(this.files[0].size > 999999) ? addAlert('File is larger than 1mb') : document.getElementById('attachment_input').value='File: '+this.value.substr(12, 9)+'..'" style="display:none">
       <input type="hidden" name="user_id" value="<?php echo $ACCOUNT['id'] ?>">
       <h1>Email</h1>
@@ -156,10 +151,10 @@ function getPraiseCard() {
     <?php
     if (!$MYACCOUNT['mode'] && $ACCOUNT['mode']) {
       echo "
-      <form onsubmit='follow(this); return false;'>
+      <form onsubmit=\"sendForm('follow', this); return false;\">
         <input type='hidden' name='func' value='follow'>
         <input type='hidden' name='follow_to' value=".$data.">
-      <input type='submit' value='".($ACCOUNT['followed'] ? "Followed" : "Follow Director")."' class='".($ACCOUNT['followed'] ? "interested" : "")."'><br>
+      <input type='submit' value='".($ACCOUNT['followed'] ? "Followed" : "Follow")."' class='".($ACCOUNT['followed'] ? "interested" : "")."'><br>
       </form>";
     }
     ?>
@@ -189,20 +184,8 @@ function getPraiseCard() {
 <!-- SCRIPTS -->
 
 <script>
-  function email(form) {
-    post("/resources/ajax/functions.php", parse(form), function(r) {
-      r = JSON.parse(r)
-      if (r["status"] == "ok") {
-        togglePopup(currentPopup)
-        setTimeout(function() {
-          window.location.href = window.location.href
-        },300)
-      } else addAlert(r['message'])
-    })
-  }
-
   function praise(form) {
-    post("/resources/ajax/functions.php", parse(form), function(r) {
+    post("/resources/ajax/praise.php", parse(form), function(r) {
       r = JSON.parse(r)
       if (r['status'] == 'ok' && r['heart'] == 1) window.location.href = window.location.href
       else if (r['status'] == 'ok') {
@@ -211,15 +194,7 @@ function getPraiseCard() {
           window.location.href = window.location.href
         }, 300)
       }
-      else  addAlert(r['message'])
-    })
-  }
-
-  function follow(form) {
-    post("/resources/ajax/functions.php", parse(form), function(r) {
-      r = JSON.parse(r)
-      if (r['status'] == 'ok') window.location.href = window.location.href
-      else  addAlert(r['message'])
+      else addAlert(r['message'])
     })
   }
 </script>

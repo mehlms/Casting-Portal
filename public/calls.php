@@ -22,8 +22,7 @@ $calls = $db->query("SELECT calls.id, calls.title, class, (SELECT genre FROM gen
 
 <div id="popup_match" class='popup'>
   <div class='card'>
-    <form onsubmit='updateMatch(this); return false'>
-      <input type="hidden" name="func" value="updateMatch">
+    <form onsubmit="sendFormPopup('update_match', this); return false">
       <h1>Match Settings</h1>
       <div class='row'>
         <div class="label">
@@ -41,21 +40,20 @@ $calls = $db->query("SELECT calls.id, calls.title, class, (SELECT genre FROM gen
 </div>
 <div id="popup_filter" class='popup'>
   <div class='card'>
-    <form onsubmit='updateFilter(this); return false'>
-      <input type="hidden" name="func" value="updateFilter">
+    <form onsubmit="sendFormPopup('update_filter', this); return false">
       <h1>Filter</h1>
-      <div class="label" style='text-align:center'>
+      <div class="label" style='text-align:center; white-space: normal'>
         <p>Include These Genres</p>
         <?php
         $genres = $db->query("SELECT * FROM genres LEFT JOIN (SELECT genre_id, COUNT(*) as checked FROM genresFilter WHERE a_id=".$MYACCOUNT['a_id']." GROUP BY genre_id) as t2 ON genres.id=t2.genre_id ORDER BY genres.id ASC")->fetchAll();
-        foreach ($genres as $d) echo "<input type='checkbox' id='genresFilter".$d['id']."' name='genresFilter[".$d['id']."]' ".($d['checked']?"":"checked")."><label for='genresFilter".$d['id']."'><input type='button' value='".$d['genre']."'></label> ";
+        foreach ($genres as $d) echo "<label><input type='checkbox' name='genresFilter[".$d['id']."]' ".($d['checked']?"":"checked")."><div class='checkbox'>".$d['genre']."</div></label> ";
         ?>
-      </div>
-      <div class="label" style='text-align:center'>
+      </div><br>
+      <div class="label" style='text-align:center; white-space: normal'>
         <p>Include These Classes</p>
         <?php
         $classes = $db->query("SELECT * FROM classes LEFT JOIN (SELECT class_id, COUNT(*) as checked FROM classesFilter WHERE a_id=".$MYACCOUNT['a_id']." GROUP BY class_id) as t2 ON classes.id=t2.class_id ORDER BY classes.id ASC")->fetchAll();
-        foreach ($classes as $d) echo "<input type='checkbox' id='classesFilter".$d['id']."' name='classesFilter[".$d['id']."]' ".($d['checked']?"":"checked")."><label for='classesFilter".$d['id']."'><input type='button' value='".str_replace("Graduate ", "", str_replace("Undergraduate ", "", $d['class']))."'></label> ";
+        foreach ($classes as $d) echo "<label><input type='checkbox' name='classesFilter[".$d['id']."]' ".($d['checked']?"":"checked")."><div class='checkbox'>".str_replace("Graduate ", "", str_replace("Undergraduate ", "", $d['class']))."</div></label> ";
         ?>
       </div>
       <input type='submit' value='Save'>
@@ -66,7 +64,7 @@ $calls = $db->query("SELECT calls.id, calls.title, class, (SELECT genre FROM gen
 <!-- PROFILE -->
 
 <div id='profile'>
-  <input type='file' id="profile_pic_file" onchange="uploadProfilePic(this)" style="display:none" accept="image/x-png,image/jpeg">
+  <form><input type='file' name='pic' id="profile_pic_file" onchange="(this.files[0].size > 999999) ? addAlert('File is larger than 1mb') : sendForm('upload_profile_pic', this.parentElement)" style="display:none" accept="image/x-png,image/jpeg"></form>
   <div class='c_pic' onclick="document.getElementById('profile_pic_file').click()" style="background-image: url('<?php echo $asset_profile; ?>')"></div>
   <div class='card'>
     <h1 id="name"><?php echo $MYACCOUNT['firstname']." ".$MYACCOUNT['lastname'] ?></h1>
@@ -117,41 +115,5 @@ $calls = $db->query("SELECT calls.id, calls.title, class, (SELECT genre FROM gen
   }
   ?>
 </div>
-
-<script>
-  function updateMatch(form) {
-    post("/resources/ajax/functions.php", parse(form), function(r) {
-      r = JSON.parse(r)
-      if (r["status"] == "ok") {
-        togglePopup(currentPopup)
-        setTimeout(function() {
-          window.location.href = window.location.href
-        }, 300)
-      } else addAlert(r['message'])
-    })
-  }
-
-  function updateFilter(form) {
-    post("/resources/ajax/functions.php", parse(form), function(r) {
-      r = JSON.parse(r)
-      if (r["status"] == "ok") {
-        togglePopup(currentPopup)
-        setTimeout(function() {
-          window.location.href = window.location.href
-        },300)
-      } else addAlert(r['message'])
-    })
-  }
-
-  function uploadProfilePic(input) {
-    if (input.files[0].size <= 999999) {
-      post("/resources/ajax/functions.php", {"func": "uploadProfilePic", "image": input.files[0]}, function(r) {
-        r = JSON.parse(r)
-        if (r['status'] == 'ok') window.location.href = window.location.href
-        addAlert(r['message'])
-      })
-    } else addAlert("That file is larger than 500kb")
-  }
-</script>
 
 <?php include "../inc/footer.php" ?>

@@ -18,7 +18,8 @@ function getPhotos() {
     echo "<div class='c_assets'>";
     foreach ($asset_photos as $d) {
       echo "<div class='c_photo' style=\"background-image: url(/resources/assets/photos/".$d['url'].")\" onclick=\"document.getElementById('popup_photo').style.backgroundImage='url(/resources/assets/photos_large/".$d['url'].")'; togglePopup(document.getElementById('popup_photo'))\">
-            <input type='button' class='c_edit c_delete' value='-' onclick=\"deleteAsset(".$d['id'].")\"></div>";
+              <form><input type='hidden' name='id' value='".$d['id']."'><input type='button' class='c_edit c_delete' value='-' onclick=\"sendForm('delete_asset', this.parentElement)\"></form>
+            </div>";
     }
     echo "</div>";
   }
@@ -33,13 +34,13 @@ function getVideos() {
     foreach ($asset_videos as $d) {
       if ($d['type'] == 3) {
         echo "<div class='label'>
-                <input type='button' class='c_edit c_delete c_delete_video' value='-' onclick=\"deleteAsset(".$d['id'].")\">
+                <form><input type='hidden' name='id' value='".$d['id']."'><input type='button' class='c_edit c_delete c_delete_video' value='-' onclick=\"sendForm('delete_asset', this.parentElement)\"></form>
                 <p>".$d['title']."</p>
                 <iframe src='https://www.youtube.com/embed/".$d['url']."' frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
               </div>";
       } else if ($d['type'] == 4) {
         echo "<div class='label'>
-                <input type='button' class='c_edit c_delete c_delete_video' value='-' onclick=\"deleteAsset(".$asset['id'].")\">
+                <form><input type='hidden' name='id' value='".$d['id']."'><input type='button' class='c_edit c_delete c_delete_video' value='-' onclick=\"sendForm('delete_asset', this.parentElement)\"></form>
                 <p>".$d['title']."</p>
                 <iframe src='https://player.vimeo.com/video/".$d['url']."' frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
               </div>";
@@ -71,12 +72,12 @@ function getDirectorCard() {
           Call for <b><a onclick=\"getCall('".$call['id']."')\">".$call["title"]."</a></b>
         </div>
         <input type='button' value='Email' onclick=\"document.getElementById('email_call_id').value='".$call['id']."'; togglePopup(document.getElementById('popup_email'))\" style='float:none'><input type='button' value='Add' onclick=\"document.getElementById('add_call_id').value='".$call['id']."'; togglePopup(document.getElementById('popup_add'))\" style='float:none'><input type='button' value='Edit' onclick=\"getEditCall(".$call['id'].")\" style='float:none'><input type='button' value='Close' onclick=\"closeCall(".$call['id'].")\" style='float:none'><br>";
-      foreach ($collaborators as $d) echo "<a href='/user/".$d['d_id']."'>".$d['firstname']." ".$d['lastname']."</a> · <a onclick='removeRow(4, ".$d['id'].")'>Remove</a><br>";
-      foreach ($auditions as $d) echo "Auditioning ".format($d['audition_time'], "M jS g:ia")." · ".$d['audition_place']." · <a onclick='removeRow(1, ".$d['id'].")'>Remove</a><br>";
-      foreach ($shootings as $d) echo "Shooting ".format($d['shooting_from'], "M jS")." - ".format($d['shooting_to'], "M jS")." · <a onclick='removeRow(2, ".$d['id'].")'>Remove</a><br>";
+      foreach ($collaborators as $d) echo "<a href='/user/".$d['d_id']."'>".$d['firstname']." ".$d['lastname']."</a> · <a onclick='removeCallItem(4, ".$d['id'].")'>Remove</a><br>";
+      foreach ($auditions as $d) echo "Auditioning ".format($d['audition_time'], "M jS g:ia")." · ".$d['audition_place']." · <a onclick='removeCallItem(1, ".$d['id'].")'>Remove</a><br>";
+      foreach ($shootings as $d) echo "Shooting ".format($d['shooting_from'], "M jS")." - ".format($d['shooting_to'], "M jS")." · <a onclick='removeCallItem(2, ".$d['id'].")'>Remove</a><br>";
       foreach ($characters as $c) {
         echo "<div class='c_text' style='text-align:center'>
-        <b>".$c["name"]."</b> · ".($c["cnt"] ? $c["cnt"]:"No ones")." interested · <a onclick='removeRow(3, ".$c['id'].")'>Remove</a><br>";
+        <b>".$c["name"]."</b> · ".($c["cnt"] ? $c["cnt"]:"No ones")." interested · <a onclick='removeCallItem(3, ".$c['id'].")'>Remove</a><br>";
         foreach ($interested as $i) {
           if ($i['char_id'] == $c['id']) {
             echo "<div class='c_photo' onclick=\"window.location.href='/user/".$i['a_id']."/'\" style='background-image: url(/resources/assets/profile/".$i['url'].")'></div>";
@@ -242,6 +243,7 @@ function getFollowerCard() {
         <p>Storyline</p>
         <textarea name='storyline' rows='3' spellcheck='false' autocomplete='off' maxlength='1000' placeholder="Brash space adventurer Peter Quill (Chris Pratt) finds himself the quarry of relentless bounty hunters after he steals an orb coveted by Ronan, a powerful villain."></textarea>
       </div>
+      <br>
       <h2>CHARACTERS</h2>
       <hr>
       <div id="characters">
@@ -289,8 +291,7 @@ function getFollowerCard() {
 </div>
 <div id="popup_edit" class='popup'>
   <div class="card">
-    <form onsubmit="editCall(this); return false">
-      <input type="hidden" name="func" value="editCall">
+    <form onsubmit="sendFormPopup('call_edit', this); return false">
       <input type="hidden" name="call_id" id="edit_call_id">
       <input type='file' id="edit_script_file" name='script' onchange="(this.files[0].size > 999999) ? addAlert('File is larger than 1mb') : document.getElementById('edit_script_input').value='Script: '+this.value.substr(12, 9)+'..'" style="display:none">
       <input type='file' id="edit_poster_file" name='poster' onchange="(this.files[0].size > 999999) ? addAlert('File is larger than 1mb') : document.getElementById('edit_poster_input').value='Poster: '+this.value.substr(12, 9)+'..'" style="display:none" accept="image/x-png,image/jpeg">
@@ -307,9 +308,7 @@ function getFollowerCard() {
             <option value='0'>Choose Class</option>
             <?php
             $classes = $db->query("SELECT * FROM classes")->fetchAll();
-            foreach ($classes as $d) {
-              echo "<option value='".$d['id']."'>".$d['class']."</option>";
-            }
+            foreach ($classes as $d) echo "<option value='".$d['id']."'>".$d['class']."</option>";
             ?>
           </select>
         </div>
@@ -321,9 +320,7 @@ function getFollowerCard() {
             <option value='0'>Choose Genre</option>
             <?php
             $genres = $db->query("SELECT * FROM genres")->fetchAll();
-            foreach ($genres as $d) {
-              echo "<option value='".$d['id']."'>".$d['genre']."</option>";
-            }
+            foreach ($genres as $d) echo "<option value='".$d['id']."'>".$d['genre']."</option>";
             ?>
           </select>
         </div>
@@ -350,7 +347,6 @@ function getFollowerCard() {
 <div id="popup_add" class='popup'>
   <div class="card">
     <form onsubmit="addToCall(this); return false">
-      <input type="hidden" name="func" value="addToCall">
       <input type="hidden" name="call_id" id="add_call_id">
       <h1>Add To Call</h1>
       <div class='row'>
@@ -447,8 +443,7 @@ function getFollowerCard() {
 </div>
 <div id="popup_settings" class='popup'>
   <div class='card'>
-    <form onsubmit='updateInfo(this); return false'>
-      <input type="hidden" name="func" value="updateInfo">
+    <form onsubmit="sendFormPopup('update_info', this); return false">
       <h1>Update Your Information</h1>
       <div class='row'>
         <div class="label">
@@ -484,8 +479,7 @@ function getFollowerCard() {
 </div>
 <div id="popup_video" class='popup'>
   <div class='card'>
-    <form class='popup_form' onsubmit='addVideo(this); return false'>
-      <input type="hidden" name="func" value="addVideo">
+    <form onsubmit="sendFormPopup('add_video', this); return false">
       <h1>Add a Video</h1>
       <div class="label">
         <p>Title</p>
@@ -515,8 +509,7 @@ function getFollowerCard() {
 </div>
 <div id="popup_email" class='popup'>
   <div class='card'>
-    <form onsubmit='email(this); return false'>
-      <input type="hidden" name="func" value="emailBlast">
+    <form onsubmit="sendFormPopup('email_blast', this); return false" style='width: 100%'>
       <input type='file' id="attachment_file" name='attachment' onchange="(this.files[0].size > 999999) ? addAlert('File is larger than 1mb') : document.getElementById('attachment_input').value='File: '+this.value.substr(12, 9)+'..'" style="display:none">
       <input type="hidden" name="call_id" value="0" id='email_call_id'>
       <h1>Email Blast</h1>
@@ -532,8 +525,8 @@ function getFollowerCard() {
 <!-- PROFILE HEADER -->
 
 <div id='profile'>
-  <input type='file' id="profile_pic_file" onchange="uploadProfilePic(this)" style="display:none" accept="image/x-png,image/jpeg">
-  <div class='c_pic' onclick="document.getElementById('profile_pic_file').click()" style="background-image: url('<?php echo $asset_profile; ?>')"></div>
+  <form><input type='file' name='pic' id="profile_pic_file" onchange="(this.files[0].size > 999999) ? addAlert('File is larger than 1mb') : sendForm('upload_profile_pic', this.parentElement)" style="display:none" accept="image/x-png,image/jpeg"></form>
+  <div class='c_pic' style="background-image: url('<?php echo $asset_profile; ?>')" onclick="document.getElementById('profile_pic_file').click()"></div>
   <div class='card'>
     <input type='button' class='c_edit <?php echo $MYACCOUNT['mode'] ? "c_director" : "c_talent" ?>' onclick="window.location.href='/toggle/'">
     <h1 id="name"><?php echo $MYACCOUNT['firstname']." ".$MYACCOUNT['lastname'] ?></h1>
@@ -570,7 +563,7 @@ function getFollowerCard() {
     <?php getVideos() ?>
   </div>
   <div class='card'>
-    <input type='file' id="upload_pic" onchange="uploadPic(this)" style="display:none" accept="image/x-png,image/jpeg">
+    <form><input type='file' name='pic' id="upload_pic" onchange="(this.files[0].size > 999999) ? addAlert('File is larger than 1mb') : sendForm('upload_pic', this.parentElement)" style="display:none" accept="image/x-png,image/jpeg"></form>
     <input type='button' class='c_edit c_add' value="+" onclick="document.getElementById('upload_pic').click()">
     <h1>Photos</h1>
     <?php getPhotos() ?>
@@ -580,10 +573,10 @@ function getFollowerCard() {
 <!-- SCRIPTS -->
 
 <script>
-  function closeCall(call_id) {
+  function removeCallItem(type, id) {
     togglePopup(document.getElementById("popup_confirm"))
     document.getElementById("confirm_yes").onclick = function() {
-      post("/resources/ajax/functions.php", {"func": "closeCall", "call_id": call_id}, function(r) {
+      post("/resources/ajax/call_remove_item.php", {"type": type, "id": id}, function(r) {
         r = JSON.parse(r)
         if (r["status"] == "ok") window.location.href = "/"
         else addAlert(r['message'])
@@ -591,42 +584,13 @@ function getFollowerCard() {
     }
   }
 
-  function removeRow(type, id) {
+  function closeCall(id) {
     togglePopup(document.getElementById("popup_confirm"))
     document.getElementById("confirm_yes").onclick = function() {
-      post("/resources/ajax/functions.php", {"func": "remove", "type": type, "id": id}, function(r) {
+      post("/resources/ajax/call_close.php", {"id": id}, function(r) {
         r = JSON.parse(r)
         if (r["status"] == "ok") window.location.href = "/"
         else addAlert(r['message'])
-      })
-    }
-  }
-
-  function email(form) {
-    post("/resources/ajax/functions.php", parse(form), function(r) {
-      r = JSON.parse(r)
-      if (r["status"] == "ok") {
-        togglePopup(currentPopup)
-        setTimeout(function() {
-          window.location.href = "/"
-        },300)
-      } else addAlert(r['message'])
-    })
-  }
-
-  function interestedConfirm(sender, char_id) {
-    togglePopup(document.getElementById("popup_confirm"))
-    document.getElementById("confirm_yes").onclick = function() {
-      post("/resources/ajax/functions.php", {"func": "interested", "char_id": char_id}, function(r) {
-        r = JSON.parse(r)
-        if (r['status'] == 'ok' && r['interested']) sender.className = "interested"
-        else if (r['status'] == 'ok' && !r['interested']) {
-          sender.className = ""
-          togglePopup(currentPopup)
-          setTimeout(function() {
-            window.location.href = "/"
-          },300)
-        } else addAlert(r['message'])
       })
     }
   }
@@ -636,20 +600,8 @@ function getFollowerCard() {
     data["auditions"] = parseArray("auditions")
     data["shootings"] = parseArray('shootings')
     data["characters"] = parseArray('characters')
-    post("/resources/ajax/functions.php", data, function(r) {
-      r = JSON.parse(r)
-      if (r["status"] == "ok") {
-        togglePopup(currentPopup)
-        setTimeout(function() {
-          window.location.href = "/"
-        },300)
-      } else addAlert(r['message'])
-    })
-  }
-
-  function editCall(form) {
-    var data = parse(form)
-    post("/resources/ajax/functions.php", data, function(r) {
+    post("/resources/ajax/call_post.php", data, function(r) {
+      console.log(r)
       r = JSON.parse(r)
       if (r["status"] == "ok") {
         togglePopup(currentPopup)
@@ -666,7 +618,7 @@ function getFollowerCard() {
     data["shootings"] = parseArray('edit_shootings')
     data["characters"] = parseArray('edit_characters')
     data["collaborators"] = parseArray('edit_collaborators')
-    post("/resources/ajax/functions.php", data, function(r) {
+    post("/resources/ajax/call_add.php", data, function(r) {
       r = JSON.parse(r)
       if (r["status"] == "ok") {
         togglePopup(currentPopup)
@@ -678,7 +630,7 @@ function getFollowerCard() {
   }
 
   function getEditCall(id) {
-    post("/resources/ajax/functions.php", {"func": "getCall", "id": id}, function(r) {
+    post("/resources/ajax/call_get.php", {"id": id}, function(r) {
       r = JSON.parse(r)
       if (r["status"] == "ok") {
         var popup = document.getElementById("popup_edit")
@@ -690,60 +642,6 @@ function getFollowerCard() {
         popup.querySelector("textarea[name='storyline']").value = r['call']['storyline']
         togglePopup(popup)
       } else addAlert(r['message'])
-    })
-  }
-
-  function uploadProfilePic(input) {
-    if (input.files[0].size <= 999999) {
-      post("/resources/ajax/functions.php", {"func": "uploadProfilePic", "image": input.files[0]}, function(r) {
-        r = JSON.parse(r)
-        if (r['status'] == 'ok') window.location.href = "/"
-        addAlert(r['message'])
-      })
-    } else addAlert("That file is larger than 500kb")
-  }
-
-  function uploadPic(input) {
-    if (input.files[0].size <= 999999) {
-      post("/resources/ajax/functions.php", {"func": "uploadPic", "image": input.files[0]}, function(r) {
-        r = JSON.parse(r)
-        if (r['status'] == 'ok') window.location.href = "/"
-        addAlert(r['message'])
-      })
-    } else addAlert("That file is larger than 500kb")
-  }
-
-  function updateInfo(form) {
-    data = parse(form)
-    post("/resources/ajax/functions.php", data, function(r) {
-      r = JSON.parse(r)
-      if (r["status"] == "ok") {
-        togglePopup(currentPopup)
-        setTimeout(function() {
-          window.location.href = "/"
-        },300)
-      } else addAlert(r['message'])
-    })
-  }
-
-  function addVideo(form) {
-    data = parse(form)
-    post("/resources/ajax/functions.php", data, function(r) {
-      r = JSON.parse(r)
-      if (r["status"] == "ok") {
-        togglePopup(currentPopup)
-        setTimeout(function() {
-          window.location.href = "/"
-        },300)
-      } else addAlert(r['message'])
-    })
-  }
-
-  function deleteAsset(id) {
-    post("/resources/ajax/functions.php", {"func": "deleteAsset", "id": id}, function(r) {
-      r = JSON.parse(r)
-      if (r["status"] == "ok") window.location.href = "/"
-      else addAlert(r['message'])
     })
   }
 </script>
