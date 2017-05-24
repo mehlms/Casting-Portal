@@ -20,6 +20,7 @@ Required software
 
 OTHER NOTES / TO DO'S
 
+- Visit /reset/abcdefghijklmnop123/ to create database schema 
 - /inc/email.php is for altering email server credentials (PLEASE URGENT we need to use Chapman no_reply email. Everything else costs additional $$)
 - /inc/db.php is for altering database connection
 - Enable read/write permissions to all users to all folders within /public/resources/assets/
